@@ -147,13 +147,13 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	public void Update()
 	{
-//		if (Input.GetMouseButtonDown(0))
-//		{
-//			GUI.color = Color.black;
-//			if (shot_taken) {
-//				StartCoroutine (_WaitForDepth (Input.mousePosition));
-//			}
-//		}
+		if (Input.GetMouseButtonDown(0))
+		{
+			GUI.color = Color.black;
+			if (shot_taken) {
+				StartCoroutine (_WaitForDepth (Input.mousePosition));
+			}
+		}
 
 		if (Input.GetKey(KeyCode.Escape))
 		{
@@ -178,19 +178,16 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 								UI_LABEL_START_Y,
 								300,
 								UI_LABEL_SIZE_Y);
+			Rect buttonRect2 = new Rect( UI_LABEL_START_X,
+				UI_LABEL_START_Y*5,
+				300,
+				UI_LABEL_SIZE_Y);
 			#pragma warning disable 618
 			if (GUI.Button(buttonRect, "<size=25>" + "Clear" + "</size>"))
 			{
 				// Function to clear the points entered (actually reposition the index)
 					ClearPoints();
 			}
-			#pragma warning restore 618
-
-			Rect buttonRect2 = new Rect( UI_LABEL_START_X,
-				UI_LABEL_START_Y*5,
-				300,
-				UI_LABEL_SIZE_Y);
-			#pragma warning disable 618
 			if (GUI.Button(buttonRect2, "<size=25>" + "ScreenCap" + "</size>"))
 			{
 				// Function to clear the points entered (actually reposition the index)
@@ -200,9 +197,9 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			#pragma warning restore 618
 
 			if (m_i > 0) {
-				GUI.Label (new Rect (900.0f,
+				GUI.Label (new Rect (800.0f,
 					UI_LABEL_START_Y,
-					300,
+					200,
 					UI_LABEL_SIZE_Y),
 					"<size=25>" + m_i.ToString () + "</size>");
 			}
@@ -217,13 +214,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				500.0f,
 				200.0f),
 				"<size=25>" + text + "</size>");
-			if (Input.GetMouseButtonDown(0))
-			{
-				GUI.color = Color.black;
-				if (shot_taken) {
-					StartCoroutine (_WaitForDepth (Input.mousePosition));
-				}
-			}
+			
 
 
 
@@ -314,6 +305,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 					m_i++;
 				} else {
 					UpdateLine ();
+					m_i++;
 				}
 			}
 //		}
@@ -369,9 +361,11 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				Screenshot.LoadImage (Bytes_File);
 				shot_taken = true;
 			} 
+//			#TODO //remove this part for androidapp
 			else {
 				shot_taken = true;
 			}
+//			#
 		} else {
 
 			//get rid of screenshot overlay by falsifying the screenshotBoolean
