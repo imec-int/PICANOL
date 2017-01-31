@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfMarkerData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <MarkerData>
+    <type>0</type>
+    <position>
+      <x>2.7599678</x>
+      <y>-0.874641836</y>
+      <z>-1.11629784</z>
+    </position>
+    <orientation>
+      <x>0.4330313</x>
+      <y>-0.396522433</y>
+      <z>-0.271297216</z>
+      <w>0.7626609</w>
+      <eulerAngles>
+        <x>26.4464512</x>
+        <y>290.291718</y>
+        <z>302.249329</z>
+      </eulerAngles>
+    </orientation>
+  </MarkerData>
+</ArrayOfMarkerData>

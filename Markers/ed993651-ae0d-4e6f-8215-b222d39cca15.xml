@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfMarkerData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <MarkerData>
+    <type>0</type>
+    <position>
+      <x>-0.549813867</x>
+      <y>-0.0855092555</y>
+      <z>-0.1922197</z>
+    </position>
+    <orientation>
+      <x>0.000265561685</x>
+      <y>-0.11135193</y>
+      <z>0.008152949</z>
+      <w>0.9937475</w>
+      <eulerAngles>
+        <x>0.134272575</x>
+        <y>347.214142</y>
+        <z>0.925071955</z>
+      </eulerAngles>
+    </orientation>
+  </MarkerData>
+  <MarkerData>
+    <type>0</type>
+    <position>
+      <x>-0.213320866</x>
+      <y>-0.0796289444</y>
+      <z>-0.0112682264</z>
+    </position>
+    <orientation>
+      <x>0.0114863273</x>
+      <y>0.00231185113</y>
+      <z>-0.0214442853</z>
+      <w>0.9997013</w>
+      <eulerAngles>
+        <x>1.32164156</x>
+        <y>0.236677453</y>
+        <z>357.545044</z>
+      </eulerAngles>
+    </orientation>
+  </MarkerData>
+</ArrayOfMarkerData>
