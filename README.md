@@ -10,5 +10,6 @@
 ###To Do
 'Multiplayer' setup: Helpuser shares a 'game' with assistant
 
+circle instead of square dots?
 
 Assistant creates screenshot and copy of camera to be able to point at an easy pace the workspot to be taken into account. Helper sees markernotations
