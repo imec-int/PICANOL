@@ -147,13 +147,13 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	public void Update()
 	{
-		if (Input.GetMouseButtonDown(0))
-		{
-			GUI.color = Color.black;
-			if (shot_taken) {
-				StartCoroutine (_WaitForDepth (Input.mousePosition));
-			}
-		}
+//		if (Input.GetMouseButtonDown(0))
+//		{
+//			GUI.color = Color.black;
+//			if (shot_taken) {
+//				StartCoroutine (_WaitForDepth (Input.mousePosition));
+//			}
+//		}
 
 		if (Input.GetKey(KeyCode.Escape))
 		{
@@ -200,7 +200,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			#pragma warning restore 618
 
 			if (m_i > 0) {
-				GUI.Label (new Rect (UI_LABEL_START_X + UI_LABEL_SIZE_X + 30.0f,
+				GUI.Label (new Rect (900.0f,
 					UI_LABEL_START_Y,
 					300,
 					UI_LABEL_SIZE_Y),
@@ -217,6 +217,13 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				500.0f,
 				200.0f),
 				"<size=25>" + text + "</size>");
+			if (Input.GetMouseButtonDown(0))
+			{
+				GUI.color = Color.black;
+				if (shot_taken) {
+					StartCoroutine (_WaitForDepth (Input.mousePosition));
+				}
+			}
 
 
 
@@ -278,15 +285,15 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			TangoEnums.TangoDepthCameraRate.DISABLED);
 
 		Camera cam = Camera.main;
-		if (m_emulationCamera == null)
-		{
-			m_emulationCamera = new GameObject().AddComponent<Camera>();
-			m_emulationCamera.gameObject.name = "Tango Environment Emulation Camera";
-			const float EMULATED_CAMERA_FOV = 37.8f;
-			m_emulationCamera.fieldOfView = EMULATED_CAMERA_FOV;
-			m_emulationCamera.enabled = false;
-			GameObject.DontDestroyOnLoad(m_emulationCamera.gameObject);
-		}
+//		if (m_emulationCamera == null)
+//		{
+//			m_emulationCamera = new GameObject().AddComponent<Camera>();
+//			m_emulationCamera.gameObject.name = "Tango Environment Emulation Camera";
+//			const float EMULATED_CAMERA_FOV = 37.8f;
+//			m_emulationCamera.fieldOfView = EMULATED_CAMERA_FOV;
+//			m_emulationCamera.enabled = false;
+//			GameObject.DontDestroyOnLoad(m_emulationCamera.gameObject);
+//		}
 		//Camera cam = CamCopy;
 		//////////////////////////////////////////////////////////////////////
 		/*if (shot_taken && !camCopyMade) {
@@ -328,11 +335,9 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	}
 
 	void showDots(){
-		foreach(Vector3 t in points)
-		{
-			tempPoints [m_i] = (GameObject)Instantiate (DotMarker);
-			tempPoints[m_i].transform.position = t;
-		}
+		tempPoints [m_i] = (GameObject)Instantiate (DotMarker);
+		tempPoints[m_i].transform.position = points[m_i];
+		tempPoints[m_i].tag = "marker";
 	}
 
 	void ClearPoints()
@@ -341,10 +346,11 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		temp.Clear ();
 		m_lineRenderer.enabled = false;
 		m_i = 0;
-
-		foreach (GameObject t in tempPoints) {
-			Destroy (t);
-		}
+		GameObject[] enemies = GameObject.FindGameObjectsWithTag("marker");
+		foreach(GameObject enemy in enemies)
+			GameObject.Destroy(enemy);
+		//tempPoints = null;
+		tempPoints = new GameObject[4];
 	}
 
 	void screenCap(){
