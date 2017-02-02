@@ -4,6 +4,7 @@
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/obj/Debug/Assembly-CSharp-Editor.dll.mdb
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEngine.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEngine.Purchasing.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEngine.Analytics.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.Analytics.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.PlaymodeTestsRunner.dll
@@ -12,6 +13,7 @@
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.Networking.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEngine.UI.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.UI.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEngine.Advertisements.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.Advertisements.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/nunit.framework.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.EditorTestsRunner.dll
@@ -36,5 +38,3 @@
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Mono.Cecil.Mdb.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.iOS.Extensions.Xcode.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEditor.iOS.Extensions.Xcode.xml
-/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEngine.Purchasing.dll
-/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/UnityEngine.Advertisements.dll

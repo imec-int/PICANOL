@@ -43,6 +43,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// The line renderer to draw a line between two points.
 	/// </summary>
 	public LineRenderer m_lineRenderer;
+	public LineRenderer m_lineRenderer2;
 
 	/// <summary>
 	/// The scene's Tango application.
@@ -58,13 +59,14 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// <summary>
 	/// The older of the two points to measure.
 	/// </summary>
-//	private Vector3 m_startPoint;
+	//	private Vector3 m_startPoint;
 
 	/// <summary>
 	/// The newer of the two points to measure.
 	/// </summary>
-//	private Vector3 m_endPoint;
+	//	private Vector3 m_endPoint;
 	private Vector3 recent_point;
+	private Vector3 recent_point2;
 	/// <summary>
 	/// The distance between the two selected points.
 	/// </summary>
@@ -79,8 +81,10 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// array to store touches to be able to create area of interest
 	/// </summary>
 	private Vector3[] points;
+	private Vector3[] points2;
 	private Vector3[] positionsOfPoints;
 	private GameObject[] tempPoints;
+	private GameObject[] tempPoints2;
 	private List<Vector3> temp;
 
 	/// <summary>
@@ -91,6 +95,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// The dot marker object.
 	/// </summary>
 	public GameObject DotMarker;
+	public GameObject DotMarker2;
+	private GameObject[] DotMarkerInvisible;
 
 	/// <summary>
 	/// The cam copy object. A copy is being made when a screenCap is requested, so that we can find the closest points with a screenshot and the locally stored camera
@@ -104,14 +110,28 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	private Vector3[] ScreenPos3;
 	private bool camCopyMade;
 	public static Camera m_emulationCamera;
+	private bool mode2D;
+	private Vector2[] touchPositions;
+	private Vector2[] CamCopyVector;
+	public Texture markerTex;
+	private int pointIndex;
+	private int pointIndex2;
+	private bool checkPointCloudIndex;
+	private const int GRID_SIZE = 9;
+	private Vector2[] GridPosition;
+	/// <summary>
+	/// The margin for the grid when checking if tapped nearby a certain point.
+	/// </summary>
+	private const int margin = 10;
 	/// <summary>
 	/// Start this instance.
 	/// </summary>
-	public void Start()
+	public void Start ()
 	{
 		GUI.color = Color.black;
-		m_tangoApplication = FindObjectOfType<TangoApplication>();
-		m_tangoApplication.Register(this);
+		m_tangoApplication = FindObjectOfType<TangoApplication> ();
+		m_tangoApplication.Register (this);
+		markerTex = FindObjectOfType<Texture> ();
 		points = new Vector3[4];
 		m_i = 0;
 		temp = new List<Vector3> ();
@@ -124,14 +144,23 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			System.IO.File.Delete (Path_Name);
 		}
 		//CamCopy = new Camera ();
-		ScreenPos3=new Vector3[m_pointCloud.m_pointsCount];
+		ScreenPos3 = new Vector3[m_pointCloud.m_pointsCount];
 		camCopyMade = false;
+		mode2D = false; 
+		touchPositions = new Vector2[4];
+		CamCopyVector = new Vector2[m_pointCloud.m_pointsCount];
+
+		points2 = new Vector3[9];
+		tempPoints2 = new GameObject[4];
+		checkPointCloudIndex = false;
+		DotMarkerInvisible = new GameObject[GRID_SIZE];
+		GridPosition = new Vector2[GRID_SIZE];
 	}
 
 	/// <summary>
 	/// Unity destroy function.
 	/// </summary>
-	public void OnDestroy()
+	public void OnDestroy ()
 	{
 		//remove screencaps
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
@@ -139,86 +168,106 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			System.IO.File.Delete (Path_Name);
 		}
 		//unregister tango app
-		m_tangoApplication.Unregister(this);
+		m_tangoApplication.Unregister (this);
 	}
 
 	/// <summary>
 	/// Update this instance.
 	/// </summary>
-	public void Update()
+	public void Update ()
 	{
-		if (Input.GetMouseButtonDown(0))
-		{
-			GUI.color = Color.black;
+		if (Input.GetMouseButtonDown (0)) {
+			
 			if (shot_taken) {
 				StartCoroutine (_WaitForDepth (Input.mousePosition));
-			}
+			} 
 		}
 
-		if (Input.GetKey(KeyCode.Escape))
-		{
+		if (Input.GetKey (KeyCode.Escape)) {
 			// This is a fix for a lifecycle issue where calling
 			// Application.Quit() here, and restarting the application
 			// immediately results in a deadlocked app.
-			AndroidHelper.AndroidQuit();
+			AndroidHelper.AndroidQuit ();
 		}
 	}
 
 	/// <summary>
 	/// Display simple GUI.
 	/// </summary>
-	public void OnGUI()
+	public void OnGUI ()
 	{
-		if (m_tangoApplication.HasRequestedPermissions())
-		{
+		
+		if (m_tangoApplication.HasRequestedPermissions ()) {
+			GUI.color = Color.white;
 			if (shot_taken) {
-				GUI.DrawTexture(new Rect(0, 0, Screen.width,Screen.height),Screenshot);
+
+				Color colPreviousGUIColor = GUI.color;
+
+				GUI.color = new Color (colPreviousGUIColor.r, colPreviousGUIColor.g, colPreviousGUIColor.b, 1f);
+				GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), Screenshot);
+				GUI.color = colPreviousGUIColor;
 			}
-			Rect buttonRect = new Rect( UI_LABEL_START_X,
-								UI_LABEL_START_Y,
-								300,
-								UI_LABEL_SIZE_Y);
-			Rect buttonRect2 = new Rect( UI_LABEL_START_X,
-				UI_LABEL_START_Y*5,
+			Rect buttonRect = new Rect (UI_LABEL_START_X,
+				                  UI_LABEL_START_Y,
+				                  300,
+				                  UI_LABEL_SIZE_Y);
+			Rect buttonRect2 = new Rect (UI_LABEL_START_X,
+				                   UI_LABEL_START_Y * 5,
+				                   300,
+				                   UI_LABEL_SIZE_Y);
+			Rect buttonRect3 = new Rect (UI_LABEL_START_X,
+				UI_LABEL_START_Y * 10,
 				300,
 				UI_LABEL_SIZE_Y);
 			#pragma warning disable 618
-			if (GUI.Button(buttonRect, "<size=25>" + "Clear" + "</size>"))
-			{
+			if (GUI.Button (buttonRect, "<size=25>" + "Clear" + "</size>")) {
 				// Function to clear the points entered (actually reposition the index)
-					ClearPoints();
+				ClearPoints ();
 			}
-			if (GUI.Button(buttonRect2, "<size=25>" + "ScreenCap" + "</size>"))
-			{
+			if (GUI.Button (buttonRect2, "<size=25>" + "ScreenCap" + "</size>")) {
 				// Function to clear the points entered (actually reposition the index)
-				screenCap();
+				screenCap ();
 
 			}
+			if (GUI.Button (buttonRect3, "<size=20>" + "new screencap" + "</size>")) {
+				newScreenCap ();
+			}
+//			if (mode2D) { 
+//				//array list with vector2 coords to draw temp dots
+//				//GUI.DrawTextureWithTexCoords(new Rect(0,0,touchPositions[m_i].x,touchPositions[m_i].y),markerTex, new Rect(0,0,10f,10f));
+//				GUI.DrawTexture (new Rect (touchPositions [m_i - 1], new Vector2 (10f, 10f)), markerTex);
+//			}
 			#pragma warning restore 618
 
-			if (m_i > 0) {
-				GUI.Label (new Rect (800.0f,
-					UI_LABEL_START_Y,
-					200,
-					UI_LABEL_SIZE_Y),
-					"<size=25>" + m_i.ToString () + "</size>");
-			}
+//			if (m_i > 0) {
+//				GUI.Label (new Rect (800.0f,
+//					UI_LABEL_START_Y,
+//					200,
+//					UI_LABEL_SIZE_Y),
+//					"<size=25>" + m_i.ToString () + "</size>");
+//			}
 			string text;
 			if (shot_taken) {
-				text = "Pic taken! " + Path_Name.ToString ();
+				text = "Pic taken! "; //+ Path_Name.ToString ()
 			} else {
 				text = "Pic not taken yet";
 			}
-			GUI.Label(new Rect(500.0f,
+			GUI.Label (new Rect (500.0f,
 				UI_LABEL_START_Y,
 				500.0f,
 				200.0f),
 				"<size=25>" + text + "</size>");
-			
-
-
-
+//			GUI.TextField (new Rect (800.0f,
+//				UI_LABEL_START_Y,
+//				400f,
+//				100f),
+//				m_i.ToString () + " wanted " + pointIndex.ToString () + " " + recent_point.ToString () + " through cam " + pointIndex2.ToString () + " " + recent_point2.ToString ());
+//			GUI.TextField (new Rect (800.0f,
+//				UI_LABEL_START_Y + 100f,
+//				400f,
+//				100), "PointCloud corresponds? " + checkPointCloudIndex.ToString ());
 		}
+
 	}
 
 	/// <summary>
@@ -227,7 +276,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// On the Tango tablet, the depth callback occurs at 5 Hz.
 	/// </summary>
 	/// <param name="tangoDepth">Tango depth.</param>
-	public void OnTangoDepthAvailable(TangoUnityDepth tangoDepth)
+	public void OnTangoDepthAvailable (TangoUnityDepth tangoDepth)
 	{
 		// Don't handle depth here because the PointCloud may not have been
 		// updated yet. Just tell the coroutine it can continue.
@@ -237,16 +286,16 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// <summary>
 	/// This is called when successfully connected to Tango service.
 	/// </summary>
-	public void OnTangoServiceConnected()
+	public void OnTangoServiceConnected ()
 	{
-		m_tangoApplication.SetDepthCameraRate(
+		m_tangoApplication.SetDepthCameraRate (
 			TangoEnums.TangoDepthCameraRate.DISABLED);
 	}
 
 	/// <summary>
 	/// This is called when disconnected from the Tango service.
 	/// </summary>
-	public void OnTangoServiceDisconnected()
+	public void OnTangoServiceDisconnected ()
 	{
 	}
 
@@ -256,7 +305,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	/// <param name="touchPosition">Touch position on the screen.</param>
 	/// <returns>Coroutine IEnumerator.</returns>
-	private IEnumerator _WaitForDepth(Vector2 touchPosition)
+	private IEnumerator _WaitForDepth (Vector2 touchPosition)
 	{
 		// if max dots placed don't place markers or wait for depth
 		if (m_i >= 4) {
@@ -265,106 +314,117 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		m_waitingForDepth = true;
 
 		// Turn on the camera and wait for a single depth update
-		m_tangoApplication.SetDepthCameraRate(
+		m_tangoApplication.SetDepthCameraRate (
 			TangoEnums.TangoDepthCameraRate.MAXIMUM);
-		while (m_waitingForDepth)
-		{
+		while (m_waitingForDepth) {
 			yield return null;
 		}
 
-		m_tangoApplication.SetDepthCameraRate(
+		m_tangoApplication.SetDepthCameraRate (
 			TangoEnums.TangoDepthCameraRate.DISABLED);
-
-		Camera cam = Camera.main;
-//		if (m_emulationCamera == null)
-//		{
-//			m_emulationCamera = new GameObject().AddComponent<Camera>();
-//			m_emulationCamera.gameObject.name = "Tango Environment Emulation Camera";
-//			const float EMULATED_CAMERA_FOV = 37.8f;
-//			m_emulationCamera.fieldOfView = EMULATED_CAMERA_FOV;
-//			m_emulationCamera.enabled = false;
-//			GameObject.DontDestroyOnLoad(m_emulationCamera.gameObject);
-//		}
-		//Camera cam = CamCopy;
-		//////////////////////////////////////////////////////////////////////
-		/*if (shot_taken && !camCopyMade) {
-			for (int it = 0; it < m_pointCloud.m_pointsCount; ++it) {
-				ScreenPos3 [it] = cam.WorldToScreenPoint (m_pointCloud.m_points [it]);
+		int distance;
+		//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisble grid.
+//		if (Screen.height > Screen.width)
+//			distance = (int)Screen.width / 8 - margin;
+//		else
+//			distance = (int)Screen.height / 8 - margin;
+			distance = (int)Math.Sqrt((float)Math.Pow((float)Screen.width/8f,2f)+(float)Math.Pow((float)Screen.height/8f,2f));// ==> teveel overlap met schuine!
+		pointIndex = FindClosestPointGrid (touchPosition, distance);
+		if (pointIndex > -1) {
+			// choose prefab object with corresponding index
+//			recent_point = m_pointCloud.m_points [pointIndex];
+			// Place different marker on top
+			enableDot(DotMarkerInvisible[pointIndex]);
+//			recent_point = 
+//			points [m_i] = recent_point;
+//	 		showDots (DotMarker, "marker", points[m_i]);
+			if (m_i < 3) {
+				m_i++;
+			} else {
+				mode2D = false;
+				UpdateLine ();
+				m_i++;
 			}
-			camCopyMade = true;
 		}
-		if (camCopyMade) {
-			int pointIndex = FindClosestPointRemote (ScreenPos3, touchPosition, 10);*/
-		int pointIndex = m_pointCloud.FindClosestPoint (cam, touchPosition, 10);
-			////////////////////////////////////////////////////////////////////// 
-			if (pointIndex > -1) {
-				recent_point = m_pointCloud.m_points [pointIndex];
-				points [m_i] = recent_point;
-				showDots ();
-				if (m_i < 3) {
-					m_i++;
-				} else {
-					UpdateLine ();
-					m_i++;
-				}
-			}
-//		}
 	}
 
-	void UpdateLine()
+	void UpdateLine ()
 	{
 		//enable linerenderer
 		m_lineRenderer.enabled = true;
-
-		foreach(Vector3 t in points)
-			{
-				temp.Add(t);
-			}
-		temp.Add (points [0]);
-		positionsOfPoints = temp.ToArray();
-		m_lineRenderer.numPositions=positionsOfPoints.Length; // add this
-		m_lineRenderer.SetPositions(positionsOfPoints);
+		GameObject[] DotList = GameObject.FindGameObjectsWithTag ("marker");
+		foreach (GameObject t in DotList) {
+			temp.Add (t.transform.position);
+		}
+		temp.Add (DotList [0].transform.position);
+		positionsOfPoints = temp.ToArray ();
+		m_lineRenderer.numPositions = positionsOfPoints.Length; // add this
+		m_lineRenderer.SetPositions (positionsOfPoints);
 	}
 
-	void showDots(){
-		tempPoints [m_i] = (GameObject)Instantiate (DotMarker);
-		tempPoints[m_i].transform.position = points[m_i];
-		tempPoints[m_i].tag = "marker";
-	}
-
-	void ClearPoints()
+	/// <summary>
+	/// Places the markerdots.
+	/// </summary>
+	private GameObject showDots (GameObject marker, string strmarker, Vector3 MarkerPlace)
 	{
-		GUI.color = Color.yellow;
+		tempPoints [m_i] = (GameObject)Instantiate (marker);
+		tempPoints [m_i].transform.position = MarkerPlace;
+		tempPoints [m_i].tag = strmarker;
+		return tempPoints [m_i];
+	}
+	/// <summary>
+	/// Enables the dots which are being approx tapped .
+	/// </summary>
+	/// <returns>The dots.</returns>
+	private GameObject enableDot(GameObject marker){
+		GameObject test = (GameObject)Instantiate (DotMarker);
+			test.transform.position = marker.transform.position;
+		test.tag = "marker";
+		return test;
+	}
+	/// <summary>
+	/// Clears the Marker dots & the line renderer.
+	/// </summary>
+	void ClearPoints ()
+	{
 		temp.Clear ();
 		m_lineRenderer.enabled = false;
 		m_i = 0;
-		GameObject[] enemies = GameObject.FindGameObjectsWithTag("marker");
-		foreach(GameObject enemy in enemies)
-			GameObject.Destroy(enemy);
-		//tempPoints = null;
+		// remove all game objects based on marker tag
+		GameObject[] enemies = GameObject.FindGameObjectsWithTag ("marker");
+		foreach (GameObject enemy in enemies) {
+			GameObject.Destroy (enemy);
+		}
+		enemies = GameObject.FindGameObjectsWithTag ("marker_invisible");
+		foreach (GameObject enemy in enemies) {
+			GameObject.Destroy (enemy);
+		}
+		//clear points array (CORRECT WAY?)
 		tempPoints = new GameObject[4];
 	}
 
-	void screenCap(){
+	void screenCap ()
+	{
 		// Make a local copy of the camera to be used later 
 		// ==>to retrieve correct point cloud locations, we want the camera at the time the screen is being frozen by the assistant, while the person in need (PIN) is able to use his camera at free will)
 		// Coordinates of pointcloud are being made by reference of posx, posy of assistants screen taps (converted to resolution of PINs screen)
 		if (!shot_taken) {
-			//CamCopy.CopyFrom(Camera.main);
-
 			Application.CaptureScreenshot (Screen_Shot_File_Name);
 			Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
+			FillGrid ();
 			if (System.IO.File.Exists (Path_Name)) {
-			
 				byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
 				Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
 				Screenshot.LoadImage (Bytes_File);
 				shot_taken = true;
 			} 
+
 //			#TODO //remove this part for androidapp
 			else {
 				shot_taken = true;
 			}
+			// Make Copy of the PointCloud information based on this camera location
+
 //			#
 		} else {
 
@@ -374,40 +434,79 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		}
 	}
 
+	void newScreenCap(){
+		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
+		if (System.IO.File.Exists (Path_Name)) {
+			System.IO.File.Delete (Path_Name);
+		}
+
+		Screenshot = null;
+		shot_taken = false;
+		screenCap ();
+	}
+
 	/// @endcond
 	/// <summary>
-	/// Finds the closest point from a point cloud to a position on screen.
+	/// Finds the closest point from a Grid to a position on screen.
 	/// 
-	/// This function is slow, as it looks at every single point in the point
-	/// cloud. Avoid calling this more than once a frame.
+	/// This function is slow, as it looks at every single point in the absolute Grid.
+	/// Avoid calling this more than once a frame.
 	/// </summary>
 	/// <returns>The index of the closest point, or -1 if not found.</returns>
 	/// <param name="cam">The current camera.</param>
 	/// <param name="pos">Position on screen (in pixels).</param>
 	/// <param name="maxDist">The maximum pixel distance to allow.</param>
-	public int FindClosestPointRemote(Vector3[] ScreenPos3, Vector2 pos, int maxDist)
+	public int FindClosestPointGrid (Vector2 pos, int maxDist)
 	{
 		int bestIndex = -1;
 		float bestDistSqr = 0;
 
-		for (int it = 0; it < m_pointCloud.m_pointsCount; ++it)
-		{
-			//Vector3 screenPos3 = cam.WorldToScreenPoint(m_points[it]);
-			Vector2 screenPos = new Vector2(ScreenPos3[it].x, ScreenPos3[it].y);
-
-			float distSqr = Vector2.SqrMagnitude(screenPos - pos);
-			if (distSqr > maxDist * maxDist)
-			{
+		for (int i = 0; i < GRID_SIZE; i++) {
+			
+			Vector2 screenPos = GridPosition [i];
+			float distSqr = Vector2.SqrMagnitude (screenPos - pos);
+			if (distSqr > maxDist * maxDist) {
 				continue;
 			}
 
-			if (bestIndex == -1 || distSqr < bestDistSqr)
-			{
-				bestIndex = it;
+			if (bestIndex == -1 || distSqr < bestDistSqr) {
+				bestIndex = i;
 				bestDistSqr = distSqr;
 			}
 		}
 
 		return bestIndex;
 	}
+	/// <summary>
+	/// Fills the grid.
+	/// GameObject[] DotMarkerInvisible keeps track of where in absolute coords we've placed invisible markers
+	/// </summary>
+	public void FillGrid ()
+	{
+		Camera cam = Camera.main;
+		//place 1 marker in center of screen
+		//
+		// 2 5 8
+		// 1 4 7
+		// 0 3 6
+
+		int k = 0;
+		for (int i = 0; i <= 2; i++) {
+			for (int j = 0; j <= 2; j++) {
+				GridPosition [k] = new Vector2 (Screen.width * 0.25f + Screen.width * i * 0.25f, Screen.height * 0.25f + Screen.height * j * 0.25f);
+				k++;
+			}
+		}
+		for (k = 0; k < GRID_SIZE; k++) {
+			int pointIndexGrid = m_pointCloud.FindClosestPoint (cam, GridPosition [k], 10);
+			if (pointIndexGrid > -1) {
+				Vector3 recent_point_Grid = m_pointCloud.m_points [pointIndexGrid];
+				points2 [k] = recent_point_Grid;
+				DotMarkerInvisible[k]=showDots (DotMarker2, "marker_invisible", points2[k]);
+			}
+		}
+
+	}
+
 }
+
