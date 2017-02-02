@@ -43,7 +43,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// The line renderer to draw a line between two points.
 	/// </summary>
 	public LineRenderer m_lineRenderer;
-	public LineRenderer m_lineRenderer2;
 
 	/// <summary>
 	/// The scene's Tango application.
@@ -66,7 +65,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	//	private Vector3 m_endPoint;
 	private Vector3 recent_point;
-	private Vector3 recent_point2;
 	/// <summary>
 	/// The distance between the two selected points.
 	/// </summary>
@@ -81,21 +79,25 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// array to store touches to be able to create area of interest
 	/// </summary>
 	private Vector3[] points;
-	private Vector3[] points2;
 	private Vector3[] positionsOfPoints;
 	private GameObject[] tempPoints;
-	private GameObject[] tempPoints2;
-	private List<Vector3> temp;
+	private List<Vector3> Line;
 
 	/// <summary>
 	///  counter for amount of dots
 	/// </summary>
 	private int m_i;
 	/// <summary>
-	/// The dot marker object.
+	/// The dot marker object for the VISIBLE points.
 	/// </summary>
 	public GameObject DotMarker;
+	/// <summary>
+	/// If wanted (for visual feedback if algorithm is functioning properly)
+	/// </summary>
 	public GameObject DotMarker2;
+	/// <summary>
+	/// Array to keep track of the invisble gameobjects 
+	/// </summary>
 	private GameObject[] DotMarkerInvisible;
 
 	/// <summary>
@@ -107,17 +109,16 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	private string Path_Name;
 	private Texture2D Screenshot;
 	private string Screen_Shot_File_Name;
-	private Vector3[] ScreenPos3;
-	private bool camCopyMade;
-	public static Camera m_emulationCamera;
 	private bool mode2D;
-	private Vector2[] touchPositions;
-	private Vector2[] CamCopyVector;
 	public Texture markerTex;
 	private int pointIndex;
-	private int pointIndex2;
-	private bool checkPointCloudIndex;
+	/// <summary>
+	/// Amount of invisble markers to place ==> higher is preciser yet heavier? ==> BENCHMARK!
+	/// </summary>
 	private const int GRID_SIZE = 9;
+	/// <summary>
+	/// Array to keep locations of invisible markers
+	/// </summary>
 	private Vector2[] GridPosition;
 	/// <summary>
 	/// The margin for the grid when checking if tapped nearby a certain point.
@@ -134,8 +135,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		markerTex = FindObjectOfType<Texture> ();
 		points = new Vector3[4];
 		m_i = 0;
-		temp = new List<Vector3> ();
-		tempPoints = new GameObject[4];
+		Line = new List<Vector3> ();
 		shot_taken = false;
 		Screen_Shot_File_Name = "test.png";
 		// If screenshot previously existed, remove it
@@ -143,16 +143,9 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		if (System.IO.File.Exists (Path_Name)) {
 			System.IO.File.Delete (Path_Name);
 		}
-		//CamCopy = new Camera ();
-		ScreenPos3 = new Vector3[m_pointCloud.m_pointsCount];
-		camCopyMade = false;
 		mode2D = false; 
-		touchPositions = new Vector2[4];
-		CamCopyVector = new Vector2[m_pointCloud.m_pointsCount];
-
-		points2 = new Vector3[9];
-		tempPoints2 = new GameObject[4];
-		checkPointCloudIndex = false;
+		points = new Vector3[9];
+		tempPoints = new GameObject[4];
 		DotMarkerInvisible = new GameObject[GRID_SIZE];
 		GridPosition = new Vector2[GRID_SIZE];
 	}
@@ -216,7 +209,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				                   300,
 				                   UI_LABEL_SIZE_Y);
 			Rect buttonRect3 = new Rect (UI_LABEL_START_X,
-				UI_LABEL_START_Y * 10,
+				UI_LABEL_START_Y * 9,
 				300,
 				UI_LABEL_SIZE_Y);
 			#pragma warning disable 618
@@ -239,13 +232,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 //			}
 			#pragma warning restore 618
 
-//			if (m_i > 0) {
-//				GUI.Label (new Rect (800.0f,
-//					UI_LABEL_START_Y,
-//					200,
-//					UI_LABEL_SIZE_Y),
-//					"<size=25>" + m_i.ToString () + "</size>");
-//			}
 			string text;
 			if (shot_taken) {
 				text = "Pic taken! "; //+ Path_Name.ToString ()
@@ -257,15 +243,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				500.0f,
 				200.0f),
 				"<size=25>" + text + "</size>");
-//			GUI.TextField (new Rect (800.0f,
-//				UI_LABEL_START_Y,
-//				400f,
-//				100f),
-//				m_i.ToString () + " wanted " + pointIndex.ToString () + " " + recent_point.ToString () + " through cam " + pointIndex2.ToString () + " " + recent_point2.ToString ());
-//			GUI.TextField (new Rect (800.0f,
-//				UI_LABEL_START_Y + 100f,
-//				400f,
-//				100), "PointCloud corresponds? " + checkPointCloudIndex.ToString ());
 		}
 
 	}
@@ -354,10 +331,10 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		m_lineRenderer.enabled = true;
 		GameObject[] DotList = GameObject.FindGameObjectsWithTag ("marker");
 		foreach (GameObject t in DotList) {
-			temp.Add (t.transform.position);
+			Line.Add (t.transform.position);
 		}
-		temp.Add (DotList [0].transform.position);
-		positionsOfPoints = temp.ToArray ();
+		Line.Add (DotList [0].transform.position);
+		positionsOfPoints = Line.ToArray ();
 		m_lineRenderer.numPositions = positionsOfPoints.Length; // add this
 		m_lineRenderer.SetPositions (positionsOfPoints);
 	}
@@ -367,10 +344,10 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	private GameObject showDots (GameObject marker, string strmarker, Vector3 MarkerPlace)
 	{
-		tempPoints [m_i] = (GameObject)Instantiate (marker);
-		tempPoints [m_i].transform.position = MarkerPlace;
-		tempPoints [m_i].tag = strmarker;
-		return tempPoints [m_i];
+		tempPoints[m_i] = (GameObject)Instantiate (marker);
+		tempPoints[m_i].transform.position = MarkerPlace;
+		tempPoints[m_i].tag = strmarker;
+		return tempPoints[m_i];
 	}
 	/// <summary>
 	/// Enables the dots which are being approx tapped .
@@ -387,7 +364,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	void ClearPoints ()
 	{
-		temp.Clear ();
+		Line.Clear ();
 		m_lineRenderer.enabled = false;
 		m_i = 0;
 		// remove all game objects based on marker tag
@@ -491,8 +468,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		// 0 3 6
 
 		int k = 0;
-		for (int i = 0; i <= 2; i++) {
-			for (int j = 0; j <= 2; j++) {
+		for (int i = 0; i <= (int)Math.Sqrt(GRID_SIZE)-1; i++) {
+			for (int j = 0; j <= (int)Math.Sqrt(GRID_SIZE)-1; j++) {
 				GridPosition [k] = new Vector2 (Screen.width * 0.25f + Screen.width * i * 0.25f, Screen.height * 0.25f + Screen.height * j * 0.25f);
 				k++;
 			}
@@ -501,8 +478,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			int pointIndexGrid = m_pointCloud.FindClosestPoint (cam, GridPosition [k], 10);
 			if (pointIndexGrid > -1) {
 				Vector3 recent_point_Grid = m_pointCloud.m_points [pointIndexGrid];
-				points2 [k] = recent_point_Grid;
-				DotMarkerInvisible[k]=showDots (DotMarker2, "marker_invisible", points2[k]);
+				points [k] = recent_point_Grid;
+				DotMarkerInvisible[k]=showDots (DotMarker2, "marker_invisible", points[k]);
 			}
 		}
 
