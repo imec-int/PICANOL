@@ -5,6 +5,7 @@
 2. Screenshot copy should show markers on top ==> Show2DDots
 3. screenshot should open automatically
 4. no first marker when pushing the GUI button to record screenshot! ==> 
+5. when renewing screenshot extra markers added, should remove previous!
 
 ###To Do
 'Multiplayer' setup: Helpuser shares a 'game' with assistant
