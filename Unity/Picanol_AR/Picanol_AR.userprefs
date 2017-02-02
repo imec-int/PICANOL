@@ -1,0 +1,32 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/MultPointToPointGUIController.cs">
+    <Files>
+      <File FileName="Assets/Scripts/MultPointToPointGUIController.cs" Line="197" Column="99" />
+      <File FileName="Assets/TangoPrefabs/Scripts/TangoPointCloud.cs" Line="321" Column="70" />
+      <File FileName="Assets/TangoPrefabs/Scripts/TangoARPoseController.cs" Line="233" Column="67" />
+    </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>$exception</Value>
+          <Value>this.shot_taken</Value>
+          <Value>this.m_i</Value>
+          <Value>this.camCopyMade</Value>
+          <Value>this.m_emulationCamera</Value>
+          <Value>this.touchPositions</Value>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="373" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="314" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="319" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="320" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="324" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
