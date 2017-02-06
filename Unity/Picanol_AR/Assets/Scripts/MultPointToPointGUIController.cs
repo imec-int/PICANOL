@@ -56,11 +56,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	private bool m_waitingForDepth;
 
 	/// <summary>
-	/// The older of the two points to measure.
-	/// </summary>
-	//	private Vector3 m_startPoint;
-
-	/// <summary>
 	/// The newer of the two points to measure.
 	/// </summary>
 	//	private Vector3 m_endPoint;
@@ -104,7 +99,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// The cam copy object. A copy is being made when a screenCap is requested, so that we can find the closest points with a screenshot and the locally stored camera
 	/// </summary>
 	public Camera CamCopy;
-
+	private Rect buttonRect, buttonRect2, buttonRect3, screenOverlay;
 	private bool shot_taken;
 	private string Path_Name;
 	private Texture2D Screenshot;
@@ -115,7 +110,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// <summary>
 	/// Amount of invisble markers to place ==> higher is preciser yet heavier? ==> BENCHMARK!
 	/// </summary>
-	private const int GRID_SIZE = 9;
+	private const int GRID_SIZE = 144;
 	/// <summary>
 	/// Array to keep locations of invisible markers
 	/// </summary>
@@ -127,6 +122,10 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// <summary>
 	/// Start this instance.
 	/// </summary>
+	private string text;
+	private int counter;
+	public Texture2D Screenshot2;
+	private bool ScreenshotReady;
 	public void Start ()
 	{
 		GUI.color = Color.black;
@@ -144,10 +143,27 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			System.IO.File.Delete (Path_Name);
 		}
 		mode2D = false; 
-		points = new Vector3[9];
+		points = new Vector3[GRID_SIZE];
 		tempPoints = new GameObject[4];
 		DotMarkerInvisible = new GameObject[GRID_SIZE];
 		GridPosition = new Vector2[GRID_SIZE];
+		buttonRect = new Rect (UI_LABEL_START_X,
+			UI_LABEL_START_Y,
+			300,
+			UI_LABEL_SIZE_Y);
+		buttonRect2 = new Rect (UI_LABEL_START_X,
+			UI_LABEL_START_Y * 5,
+			300,
+			UI_LABEL_SIZE_Y);
+		buttonRect3 = new Rect (UI_LABEL_START_X,
+			UI_LABEL_START_Y * 9,
+			300,
+			UI_LABEL_SIZE_Y);
+		screenOverlay = new Rect (0, 0, Screen.width, Screen.height);
+		counter = 0;
+		ScreenshotReady = false;
+
+		GridCalculations ();
 	}
 
 	/// <summary>
@@ -175,7 +191,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				StartCoroutine (_WaitForDepth (Input.mousePosition));
 			} 
 		}
-
 		if (Input.GetKey (KeyCode.Escape)) {
 			// This is a fix for a lifecycle issue where calling
 			// Application.Quit() here, and restarting the application
@@ -190,28 +205,35 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	public void OnGUI ()
 	{
 		
+		
+		text= "Pic not taken yet";
 		if (m_tangoApplication.HasRequestedPermissions ()) {
+			///////////TESTCOUNTER TO CHECK ONGUI FUNC///////////////
+//			GUI.Label (new Rect (500.0f,
+//				UI_LABEL_START_Y+50f,
+//				500.0f,
+//				200.0f),
+//				"<size=25>" + counter.ToString() +"  "+shot_taken.ToString()+ "</size>");
+//			counter++;
+			GUI.Label (new Rect (500.0f,
+				UI_LABEL_START_Y+50f,
+				500.0f,
+				200.0f),
+				"<size=25>" + DotMarkerInvisible.Length.ToString() + "</size>");
+			counter++;
+			/////////////////////////////////////////////////////////
 			GUI.color = Color.white;
-			if (shot_taken) {
+			if (shot_taken&&ScreenshotReady) {
+				//Color colPreviousGUIColor = GUI.color;
+				//GUI.color = new Color (colPreviousGUIColor.r, colPreviousGUIColor.g, colPreviousGUIColor.b, 1f);
 
-				Color colPreviousGUIColor = GUI.color;
+				//GUI.DrawTexture (screenOverlay, Screenshot2);
+				GUI.DrawTexture (screenOverlay, Screenshot);
 
-				GUI.color = new Color (colPreviousGUIColor.r, colPreviousGUIColor.g, colPreviousGUIColor.b, 1f);
-				GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), Screenshot);
-				GUI.color = colPreviousGUIColor;
-			}
-			Rect buttonRect = new Rect (UI_LABEL_START_X,
-				                  UI_LABEL_START_Y,
-				                  300,
-				                  UI_LABEL_SIZE_Y);
-			Rect buttonRect2 = new Rect (UI_LABEL_START_X,
-				                   UI_LABEL_START_Y * 5,
-				                   300,
-				                   UI_LABEL_SIZE_Y);
-			Rect buttonRect3 = new Rect (UI_LABEL_START_X,
-				UI_LABEL_START_Y * 9,
-				300,
-				UI_LABEL_SIZE_Y);
+				//GUI.color = colPreviousGUIColor;
+				text = "screenshot on! "; //+ Path_Name.ToString ()
+			}else text = "screenshot off";
+
 			#pragma warning disable 618
 			if (GUI.Button (buttonRect, "<size=25>" + "Clear" + "</size>")) {
 				// Function to clear the points entered (actually reposition the index)
@@ -219,9 +241,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			}
 			if (GUI.Button (buttonRect2, "<size=25>" + "ScreenCap" + "</size>")) {
 				// Function to clear the points entered (actually reposition the index)
-				screenCap ();
-
-			}
+				screenCap ();}
 			if (GUI.Button (buttonRect3, "<size=20>" + "new screencap" + "</size>")) {
 				newScreenCap ();
 			}
@@ -232,12 +252,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 //			}
 			#pragma warning restore 618
 
-			string text;
-			if (shot_taken) {
-				text = "Pic taken! "; //+ Path_Name.ToString ()
-			} else {
-				text = "Pic not taken yet";
-			}
 			GUI.Label (new Rect (500.0f,
 				UI_LABEL_START_Y,
 				500.0f,
@@ -308,13 +322,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			distance = (int)Math.Sqrt((float)Math.Pow((float)Screen.width/8f,2f)+(float)Math.Pow((float)Screen.height/8f,2f));// ==> teveel overlap met schuine!
 		pointIndex = FindClosestPointGrid (touchPosition, distance);
 		if (pointIndex > -1) {
-			// choose prefab object with corresponding index
-//			recent_point = m_pointCloud.m_points [pointIndex];
-			// Place different marker on top
 			enableDot(DotMarkerInvisible[pointIndex]);
-//			recent_point = 
-//			points [m_i] = recent_point;
-//	 		showDots (DotMarker, "marker", points[m_i]);
 			if (m_i < 3) {
 				m_i++;
 			} else {
@@ -381,34 +389,22 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	}
 
 	void screenCap ()
-	{
-		// Make a local copy of the camera to be used later 
-		// ==>to retrieve correct point cloud locations, we want the camera at the time the screen is being frozen by the assistant, while the person in need (PIN) is able to use his camera at free will)
-		// Coordinates of pointcloud are being made by reference of posx, posy of assistants screen taps (converted to resolution of PINs screen)
-		if (!shot_taken) {
-			Application.CaptureScreenshot (Screen_Shot_File_Name);
-			Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
-			FillGrid ();
-			if (System.IO.File.Exists (Path_Name)) {
-				byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
-				Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
-				Screenshot.LoadImage (Bytes_File);
-				shot_taken = true;
-			} 
+	{			
+		// We turn the screenshot on or off
+		//get rid of screenshot overlay by falsifying the screenshotBoolean
+		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
+		ScreenshotReady = false;
+		if(System.IO.File.Exists (Path_Name)) {
+			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
+			Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
+			ScreenshotReady = Screenshot.LoadImage (Bytes_File);
 
-//			#TODO //remove this part for androidapp
-			else {
-				shot_taken = true;
-			}
-			// Make Copy of the PointCloud information based on this camera location
+		}	
+//		while (!ScreenshotReady) {
+//		}
 
-//			#
-		} else {
+		shot_taken = !shot_taken;
 
-			//get rid of screenshot overlay by falsifying the screenshotBoolean
-			shot_taken = false;
-		
-		}
 	}
 
 	void newScreenCap(){
@@ -416,10 +412,21 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		if (System.IO.File.Exists (Path_Name)) {
 			System.IO.File.Delete (Path_Name);
 		}
+		ClearPoints ();
+		ScreenshotReady = false;
+		//Screenshot = null;
+		Application.CaptureScreenshot (Screen_Shot_File_Name);
+		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
+		FillGrid ();
+		if(System.IO.File.Exists (Path_Name)) {
+			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
+			Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
+			ScreenshotReady = Screenshot.LoadImage (Bytes_File);
 
-		Screenshot = null;
-		shot_taken = false;
-		screenCap ();
+		}	
+
+		//GetComponent<Renderer> ().material.mainTexture = Screenshot;
+		//shot_taken = true;
 	}
 
 	/// @endcond
@@ -467,14 +474,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		// 1 4 7
 		// 0 3 6
 
-		int k = 0;
-		for (int i = 0; i <= (int)Math.Sqrt(GRID_SIZE)-1; i++) {
-			for (int j = 0; j <= (int)Math.Sqrt(GRID_SIZE)-1; j++) {
-				GridPosition [k] = new Vector2 (Screen.width * 0.25f + Screen.width * i * 0.25f, Screen.height * 0.25f + Screen.height * j * 0.25f);
-				k++;
-			}
-		}
-		for (k = 0; k < GRID_SIZE; k++) {
+		for (int k = 0; k < GRID_SIZE; k++) {
 			int pointIndexGrid = m_pointCloud.FindClosestPoint (cam, GridPosition [k], 10);
 			if (pointIndexGrid > -1) {
 				Vector3 recent_point_Grid = m_pointCloud.m_points [pointIndexGrid];
@@ -483,6 +483,18 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			}
 		}
 
+	}
+
+	private void GridCalculations(){
+		int loop = (int)Math.Sqrt(GRID_SIZE);
+		float screenDiv = (float)(1/((float)loop+1));
+		int k = 0;
+		for (int i = 0; i <= loop-1; i++) {
+			for (int j = 0; j <= loop-1; j++) {
+				GridPosition [k] = new Vector2 (Screen.width * screenDiv + Screen.width * i * screenDiv, Screen.height * screenDiv + Screen.height * j * screenDiv);
+				k++;
+			}
+		}
 	}
 
 }
