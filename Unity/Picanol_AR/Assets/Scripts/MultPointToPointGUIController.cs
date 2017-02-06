@@ -204,6 +204,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 			} else {
 				lineList.Clear ();
 				lineList.Add (tmp);
+				Line.Clear ();
 			}
 		}
 
@@ -217,6 +218,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 		if (Input.GetMouseButton (0)) {
 			if (circle) {
 				lineList.Add (tmp);
+				StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
 			} else {
 			// do nothing
 			}
@@ -371,9 +373,9 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 		//enable linerenderer
 		m_lineRenderer.enabled = true;
 		Vector2 lastPointScreen = Input.mousePosition;
-		for (int i = 0; i < lineList.Count; i++) {
-			Line.Add (new Vector3(lastPoint.x+(lastPointScreen.x-lineList[i].x)/Screen.width, lastPoint.y+(Screen.height-lastPointScreen.y-lineList[i].y)/Screen.height, lastPoint.z ));
-		}
+//		for (int i = 0; i < lineList.Count; i++) {
+//			Line.Add (new Vector3(lastPoint.x+(lastPointScreen.x-lineList[i].x)/Screen.width, lastPoint.y+(Screen.height-lastPointScreen.y-lineList[i].y)/Screen.height, lastPoint.z ));
+//		}
 
 		Line.Add (lastPoint);
 		positionsOfPoints = Line.ToArray ();
