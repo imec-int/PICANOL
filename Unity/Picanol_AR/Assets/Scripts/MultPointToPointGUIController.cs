@@ -22,11 +22,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Tango;
 using UnityEngine;
+using UnityEngine.Networking;
 
 /// <summary>
 /// GUI controller to show distance data.
 /// </summary>
-public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
+public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBehaviour
 {
 	// Constant values for overlay.
 	public const float UI_LABEL_START_X = 15.0f;
@@ -126,6 +127,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	private int counter;
 	public Texture2D Screenshot2;
 	private bool ScreenshotReady;
+	private bool circle;
+	private List<Vector2> lineList;
 	public void Start ()
 	{
 		GUI.color = Color.black;
@@ -164,6 +167,9 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		ScreenshotReady = false;
 
 		GridCalculations ();
+
+		lineList = new List<Vector2> ();
+		circle = false; 
 	}
 
 	/// <summary>
@@ -185,12 +191,43 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	public void Update ()
 	{
+		///////////////////////
+		Vector2 tmp;
+		tmp = Input.mousePosition;
+		tmp.y = Screen.height - tmp.y;
+
 		if (Input.GetMouseButtonDown (0)) {
-			
-			if (shot_taken) {
-				StartCoroutine (_WaitForDepth (Input.mousePosition));
-			} 
+			if (!circle) {
+				if (shot_taken) {
+					StartCoroutine (_WaitForDepth (Input.mousePosition));
+				} 
+			} else {
+				lineList.Clear ();
+				lineList.Add (tmp);
+			}
 		}
+
+		if(Input.GetMouseButtonUp(0)){
+			if (circle) {
+				StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
+			} else {
+				// do nothing
+			}
+		}
+		if (Input.GetMouseButton (0)) {
+			if (circle) {
+				lineList.Add (tmp);
+			} else {
+			// do nothing
+			}
+		}
+		///////////////////////
+//		if (Input.GetMouseButtonDown (0)) {
+//			
+//			if (shot_taken) {
+//				StartCoroutine (_WaitForDepth (Input.mousePosition));
+//			} 
+//		}
 		if (Input.GetKey (KeyCode.Escape)) {
 			// This is a fix for a lifecycle issue where calling
 			// Application.Quit() here, and restarting the application
@@ -208,55 +245,59 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		
 		text= "Pic not taken yet";
 		if (m_tangoApplication.HasRequestedPermissions ()) {
-			///////////TESTCOUNTER TO CHECK ONGUI FUNC///////////////
-//			GUI.Label (new Rect (500.0f,
-//				UI_LABEL_START_Y+50f,
-//				500.0f,
-//				200.0f),
-//				"<size=25>" + counter.ToString() +"  "+shot_taken.ToString()+ "</size>");
-//			counter++;
-			GUI.Label (new Rect (500.0f,
-				UI_LABEL_START_Y+50f,
-				500.0f,
-				200.0f),
-				"<size=25>" + DotMarkerInvisible.Length.ToString() + "</size>");
-			counter++;
-			/////////////////////////////////////////////////////////
-			GUI.color = Color.white;
-			if (shot_taken&&ScreenshotReady) {
-				//Color colPreviousGUIColor = GUI.color;
-				//GUI.color = new Color (colPreviousGUIColor.r, colPreviousGUIColor.g, colPreviousGUIColor.b, 1f);
+			if (!circle) {
+//				GUI.Label (new Rect (500.0f,
+//					UI_LABEL_START_Y + 50f,
+//					500.0f,
+//					200.0f),
+//					"<size=25>" + DotMarkerInvisible.Length.ToString () + "</size>");
 
-				//GUI.DrawTexture (screenOverlay, Screenshot2);
-				GUI.DrawTexture (screenOverlay, Screenshot);
+				GUI.color = Color.white;
+				if (shot_taken && ScreenshotReady) {
+					//Color colPreviousGUIColor = GUI.color;
+					//GUI.color = new Color (colPreviousGUIColor.r, colPreviousGUIColor.g, colPreviousGUIColor.b, 1f);
 
-				//GUI.color = colPreviousGUIColor;
-				text = "screenshot on! "; //+ Path_Name.ToString ()
-			}else text = "screenshot off";
+					//GUI.DrawTexture (screenOverlay, Screenshot2);
+					GUI.DrawTexture (screenOverlay, Screenshot);
 
-			#pragma warning disable 618
-			if (GUI.Button (buttonRect, "<size=25>" + "Clear" + "</size>")) {
-				// Function to clear the points entered (actually reposition the index)
-				ClearPoints ();
-			}
-			if (GUI.Button (buttonRect2, "<size=25>" + "ScreenCap" + "</size>")) {
-				// Function to clear the points entered (actually reposition the index)
-				screenCap ();}
-			if (GUI.Button (buttonRect3, "<size=20>" + "new screencap" + "</size>")) {
-				newScreenCap ();
-			}
+					//GUI.color = colPreviousGUIColor;
+					//text = "screenshot on! "; //+ Path_Name.ToString ()
+				}//else text = "screenshot off";
+
+				#pragma warning disable 618
+				if (GUI.Button (buttonRect, "<size=25>" + "Circle?" + "</size>")) {
+					// Function to clear the points entered (actually reposition the index)
+					circle = true;
+				}
+				if (GUI.Button (buttonRect2, "<size=25>" + "ScreenCap" + "</size>")) {
+					// Function to clear the points entered (actually reposition the index)
+					screenCap ();
+				}
+				if (GUI.Button (buttonRect3, "<size=20>" + "new screencap" + "</size>")) {
+					ClearPoints ();
+					newScreenCap ();
+				}
 //			if (mode2D) { 
 //				//array list with vector2 coords to draw temp dots
 //				//GUI.DrawTextureWithTexCoords(new Rect(0,0,touchPositions[m_i].x,touchPositions[m_i].y),markerTex, new Rect(0,0,10f,10f));
 //				GUI.DrawTexture (new Rect (touchPositions [m_i - 1], new Vector2 (10f, 10f)), markerTex);
 //			}
-			#pragma warning restore 618
+				#pragma warning restore 618
 
-			GUI.Label (new Rect (500.0f,
-				UI_LABEL_START_Y,
-				500.0f,
-				200.0f),
-				"<size=25>" + text + "</size>");
+				GUI.Label (new Rect (500.0f,
+					UI_LABEL_START_Y,
+					500.0f,
+					200.0f),
+					"<size=25>" + text + "</size>");
+			} else {
+				if (GUI.Button (buttonRect, "<size=25>" + "rectangle?" + "</size>")) {
+					circle = false;
+				}
+				if (GUI.Button (buttonRect2, "<size=25>" + "Clear" + "</size>")) {
+					// Function to clear the points entered (actually reposition the index)
+					ClearPoints ();
+				}
+			}
 		}
 
 	}
@@ -296,6 +337,56 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	/// <param name="touchPosition">Touch position on the screen.</param>
 	/// <returns>Coroutine IEnumerator.</returns>
+	private IEnumerator _WaitForDepthCircle (Vector2 touchPosition)
+	{
+		
+		m_waitingForDepth = true;
+
+		// Turn on the camera and wait for a single depth update
+		m_tangoApplication.SetDepthCameraRate (
+			TangoEnums.TangoDepthCameraRate.MAXIMUM);
+		while (m_waitingForDepth) {
+			yield return null;
+		}
+
+		m_tangoApplication.SetDepthCameraRate (
+			TangoEnums.TangoDepthCameraRate.DISABLED);
+//		int distance;
+		//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisble grid.
+//		if (Screen.height > Screen.width)
+//			distance = (int)Screen.width / 8 - margin;
+//		else
+//			distance = (int)Screen.height / 8 - margin;
+//			distance = (int)Math.Sqrt((float)Math.Pow((float)Screen.width/8f,2f)+(float)Math.Pow((float)Screen.height/8f,2f));// ==> teveel overlap met schuine!
+		Camera cam = Camera.main;
+		pointIndex = m_pointCloud.FindClosestPoint(cam, touchPosition, 10);
+		Vector3 lastPoint = m_pointCloud.m_points [pointIndex];
+		if (pointIndex > -1) {
+			UpdateCircle (lastPoint);
+			}
+		}
+
+	void UpdateCircle (Vector3 lastPoint)
+	{
+		//enable linerenderer
+		m_lineRenderer.enabled = true;
+		Vector2 lastPointScreen = Input.mousePosition;
+		for (int i = 0; i < lineList.Count; i++) {
+			Line.Add (new Vector3(lastPoint.x+(lastPointScreen.x-lineList[i].x)/Screen.width, lastPoint.y+(Screen.height-lastPointScreen.y-lineList[i].y)/Screen.height, lastPoint.z ));
+		}
+
+		Line.Add (lastPoint);
+		positionsOfPoints = Line.ToArray ();
+		m_lineRenderer.numPositions = positionsOfPoints.Length; // add this
+		m_lineRenderer.SetPositions (positionsOfPoints);
+	}
+
+	/// <summary>
+	/// Wait for the next depth update, then find the nearest point in the point
+	/// cloud.
+	/// </summary>
+	/// <param name="touchPosition">Touch position on the screen.</param>
+	/// <returns>Coroutine IEnumerator.</returns>
 	private IEnumerator _WaitForDepth (Vector2 touchPosition)
 	{
 		// if max dots placed don't place markers or wait for depth
@@ -315,11 +406,11 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			TangoEnums.TangoDepthCameraRate.DISABLED);
 		int distance;
 		//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisble grid.
-//		if (Screen.height > Screen.width)
-//			distance = (int)Screen.width / 8 - margin;
-//		else
-//			distance = (int)Screen.height / 8 - margin;
-			distance = (int)Math.Sqrt((float)Math.Pow((float)Screen.width/8f,2f)+(float)Math.Pow((float)Screen.height/8f,2f));// ==> teveel overlap met schuine!
+		//		if (Screen.height > Screen.width)
+		//			distance = (int)Screen.width / 8 - margin;
+		//		else
+		//			distance = (int)Screen.height / 8 - margin;
+		distance = (int)Math.Sqrt((float)Math.Pow((float)Screen.width/8f,2f)+(float)Math.Pow((float)Screen.height/8f,2f));// ==> teveel overlap met schuine!
 		pointIndex = FindClosestPointGrid (touchPosition, distance);
 		if (pointIndex > -1) {
 			enableDot(DotMarkerInvisible[pointIndex]);
@@ -332,7 +423,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			}
 		}
 	}
-
 	void UpdateLine ()
 	{
 		//enable linerenderer
