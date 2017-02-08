@@ -89,7 +89,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 	private Texture2D Screenshot;
 	private string Screen_Shot_File_Name;
 	private bool mode2D;
-//	public Texture markerTex;
+	//	public Texture markerTex;
 	private int pointIndex;
 	/// <summary>
 	/// Amount of invisble markers to place ==> higher is preciser yet heavier? ==> BENCHMARK!
@@ -116,7 +116,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 		GUI.color = Color.black;
 		m_tangoApplication = FindObjectOfType<TangoApplication> ();
 		m_tangoApplication.Register (this);
-//		markerTex = FindObjectOfType<Texture> ();
 		points = new Vector3[4];
 		m_i = 0;
 		Line = new List<Vector3> ();
@@ -146,12 +145,11 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 			UI_LABEL_SIZE_Y);
 		screenOverlay = new Rect (0, 0, Screen.width, Screen.height);
 		ScreenshotReady = false;
-
+		// keep track of positions of screen to place markers if necessary (rectangle option)
 		GridCalculations ();
 
 		lineList = new List<Vector2> ();
 		circle = false; 
-
 	}
 
 	/// <summary>
@@ -180,17 +178,18 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 
 		if (Input.GetMouseButtonDown (0)) {
 			if (!circle) {
-				if (shot_taken) {
-					StartCoroutine (_WaitForDepth (Input.mousePosition));
-				} 
+				//if (ScreenshotReady) {
+				StartCoroutine (_WaitForDepth (Input.mousePosition));
+				//} 
 			} else {
-				lineList.Clear ();
+				//lineList.Clear ();
 				lineList.Add (tmp);
-				Line.Clear ();
+				//Line.Clear ();
+				// start new instance of LineList & Line, get a new LineRenderer
 			}
 		}
 
-		if(Input.GetMouseButtonUp(0)){
+		if (Input.GetMouseButtonUp (0)) {
 			if (circle) {
 				StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
 			} else {
@@ -202,7 +201,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 				lineList.Add (tmp);
 				StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
 			} else {
-			// do nothing
+				// do nothing
 			}
 		}
 		if (Input.GetKey (KeyCode.Escape)) {
@@ -218,17 +217,9 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 	/// </summary>
 	public void OnGUI ()
 	{
-		
-		
-		text= "Pic not taken yet";
+		text = "Pic not taken yet";
 		if (m_tangoApplication.HasRequestedPermissions ()) {
 			if (!circle) {
-//				GUI.Label (new Rect (500.0f,
-//					UI_LABEL_START_Y + 50f,
-//					500.0f,
-//					200.0f),
-//					"<size=25>" + DotMarkerInvisible.Length.ToString () + "</size>");
-
 				GUI.color = Color.white;
 				if (shot_taken) {
 					//Color colPreviousGUIColor = GUI.color;
@@ -328,12 +319,12 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 
 		m_tangoApplication.SetDepthCameraRate (TangoEnums.TangoDepthCameraRate.DISABLED);
 		Camera cam = Camera.main;
-		pointIndex = m_pointCloud.FindClosestPoint(cam, touchPosition, 10);
+		pointIndex = m_pointCloud.FindClosestPoint (cam, touchPosition, 10);
 		Vector3 lastPoint = m_pointCloud.m_points [pointIndex];
 		if (pointIndex > -1) {
 			UpdateCircle (lastPoint);
-			}
 		}
+	}
 
 	void UpdateCircle (Vector3 lastPoint)
 	{
@@ -368,25 +359,45 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 
 		m_tangoApplication.SetDepthCameraRate (
 			TangoEnums.TangoDepthCameraRate.DISABLED);
-		int distance;
-		//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisble grid.
-		//		if (Screen.height > Screen.width)
-		//			distance = (int)Screen.width / 8 - margin;
-		//		else
-		//			distance = (int)Screen.height / 8 - margin;
-		distance = (int)Math.Sqrt((float)Math.Pow((float)Screen.width/8f,2f)+(float)Math.Pow((float)Screen.height/8f,2f));// ==> teveel overlap met schuine!
-		pointIndex = FindClosestPointGrid (touchPosition, distance);
-		if (pointIndex > -1) {
-			enableDot(DotMarkerInvisible[pointIndex]);
-			if (m_i < 3) {
-				m_i++;
-			} else {
-				mode2D = false;
-				UpdateLine ();
-				m_i++;
+		int distance = 0;
+		distance = (int)Math.Sqrt ((float)Math.Pow ((float)Screen.width / 8f, 2f) + (float)Math.Pow ((float)Screen.height / 8f, 2f));// ==> teveel overlap met schuine!
+		//With screenoverlay
+		if (shot_taken) {
+			//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisble grid.
+			//		if (Screen.height > Screen.width)
+			//			distance = (int)Screen.width / 8 - margin;
+			//		else
+			//			distance = (int)Screen.height / 8 - margin;
+			pointIndex = FindClosestPointGrid (touchPosition, distance);
+			if (pointIndex > -1) {
+				enableDot (DotMarkerInvisible [pointIndex].transform.position);
+				if (m_i < 3) {
+					m_i++;
+				} else {
+					mode2D = false;
+					UpdateLine ();
+					m_i++;
+				}
 			}
 		}
+		//WITHOUT screenoverlay (through camera)
+		else {
+			Camera cam = Camera.main;
+			pointIndex = m_pointCloud.FindClosestPoint (cam, touchPosition, 10);
+			if (pointIndex > -1) {
+				enableDot (m_pointCloud.m_points [pointIndex]);
+				if (m_i < 3) {
+					m_i++;
+				} else {
+					mode2D = false;
+					UpdateLine ();
+					m_i++;
+				}
+			}
+		}
+
 	}
+
 	void UpdateLine ()
 	{
 		//enable linerenderer
@@ -406,21 +417,24 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 	/// </summary>
 	private GameObject showDots (GameObject marker, string strmarker, Vector3 MarkerPlace)
 	{
-		tempPoints[m_i] = (GameObject)Instantiate (marker);
-		tempPoints[m_i].transform.position = MarkerPlace;
-		tempPoints[m_i].tag = strmarker;
-		return tempPoints[m_i];
+		tempPoints [m_i] = (GameObject)Instantiate (marker);
+		tempPoints [m_i].transform.position = MarkerPlace;
+		tempPoints [m_i].tag = strmarker;
+		return tempPoints [m_i];
 	}
+
 	/// <summary>
 	/// Enables the dots which are being approx tapped .
 	/// </summary>
 	/// <returns>The dots.</returns>
-	private GameObject enableDot(GameObject marker){
+	private GameObject enableDot (Vector3 pos)
+	{
 		GameObject test = (GameObject)Instantiate (DotMarker);
-			test.transform.position = marker.transform.position;
+		test.transform.position = pos;
 		test.tag = "marker";
 		return test;
 	}
+
 	/// <summary>
 	/// Clears the Marker dots & the line renderer.
 	/// </summary>
@@ -450,37 +464,30 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 		ScreenshotReady = false;
 		//Application.CaptureScreenshot (Screen_Shot_File_Name);
 		//StartCoroutine(screenShotCoroutine());
-		if(System.IO.File.Exists (Path_Name)) {
+		if (System.IO.File.Exists (Path_Name)) {
 			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
 			Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
 			ScreenshotReady = Screenshot.LoadImage (Bytes_File);
 
 		}	
-		while (!ScreenshotReady) {
-		}
-
+//		while (!ScreenshotReady) {
+//		}
 		shot_taken = !shot_taken;
 
 	}
 
-	void newScreenCap(){
+	void newScreenCap ()
+	{
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
 		if (System.IO.File.Exists (Path_Name)) {
 			System.IO.File.Delete (Path_Name);
 		}
 
 		ScreenshotReady = false;
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// 		//Create new thread then save image to file
-		new System.Threading.Thread(() =>
-			{
-				System.Threading.Thread.Sleep(100);
-				Application.CaptureScreenshot (Screen_Shot_File_Name);
-			}).Start();
-		
+		Application.CaptureScreenshot (Screen_Shot_File_Name);
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		FillGrid ();
-		if(System.IO.File.Exists (Path_Name)) {
+		if (System.IO.File.Exists (Path_Name)) {
 			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
 			Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
 			ScreenshotReady = Screenshot.LoadImage (Bytes_File);
@@ -520,6 +527,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 
 		return bestIndex;
 	}
+
 	/// <summary>
 	/// Fills the grid.
 	/// GameObject[] DotMarkerInvisible keeps track of where in absolute coords we've placed invisible markers
@@ -538,18 +546,18 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 			if (pointIndexGrid > -1) {
 				Vector3 recent_point_Grid = m_pointCloud.m_points [pointIndexGrid];
 				points [k] = recent_point_Grid;
-				DotMarkerInvisible[k]=showDots (DotMarker2, "marker_invisible", points[k]);
+				DotMarkerInvisible [k] = showDots (DotMarker2, "marker_invisible", points [k]);
 			}
 		}
-
 	}
 
-	private void GridCalculations(){
-		int loop = (int)Math.Sqrt(GRID_SIZE);
-		float screenDiv = (float)(1/((float)loop+1));
+	private void GridCalculations ()
+	{
+		int loop = (int)Math.Sqrt (GRID_SIZE);
+		float screenDiv = (float)(1 / ((float)loop + 1));
 		int k = 0;
-		for (int i = 0; i <= loop-1; i++) {
-			for (int j = 0; j <= loop-1; j++) {
+		for (int i = 0; i <= loop - 1; i++) {
+			for (int j = 0; j <= loop - 1; j++) {
 				GridPosition [k] = new Vector2 (Screen.width * screenDiv + Screen.width * i * screenDiv, Screen.height * screenDiv + Screen.height * j * screenDiv);
 				k++;
 			}
