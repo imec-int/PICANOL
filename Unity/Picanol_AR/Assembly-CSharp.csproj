@@ -50,6 +50,7 @@
      <Compile Include="Assets\Google-Unity\Scripts\AndroidLifecycle.cs" />
      <Compile Include="Assets\Scripts\MultPointToPointGUIController.cs" />
      <Compile Include="Assets\Scripts\MultPointToPointGUIController_backup.cs" />
+     <Compile Include="Assets\Scripts\MultiPointHelp.cs" />
      <Compile Include="Assets\TangoPrefabs\Scripts\ARCameraPostProcess.cs" />
      <Compile Include="Assets\TangoPrefabs\Scripts\TangoARPoseController.cs" />
      <Compile Include="Assets\TangoPrefabs\Scripts\TangoARScreen.cs" />
