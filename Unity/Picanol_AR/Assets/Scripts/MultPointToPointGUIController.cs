@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using Tango;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Threading;
 
 /// <summary>
 /// GUI controller to show distance data.
@@ -57,21 +58,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 	private bool m_waitingForDepth;
 
 	/// <summary>
-	/// The newer of the two points to measure.
-	/// </summary>
-	//	private Vector3 m_endPoint;
-	private Vector3 recent_point;
-	/// <summary>
-	/// The distance between the two selected points.
-	/// </summary>
-	private float m_distance;
-
-	/// <summary>
-	/// The text to display the distance.
-	/// </summary>
-	private string m_distanceText;
-
-	/// <summary>
 	/// array to store touches to be able to create area of interest
 	/// </summary>
 	private Vector3[] points;
@@ -96,17 +82,14 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 	/// </summary>
 	private GameObject[] DotMarkerInvisible;
 
-	/// <summary>
-	/// The cam copy object. A copy is being made when a screenCap is requested, so that we can find the closest points with a screenshot and the locally stored camera
-	/// </summary>
-	public Camera CamCopy;
+
 	private Rect buttonRect, buttonRect2, buttonRect3, screenOverlay;
 	private bool shot_taken;
 	private string Path_Name;
 	private Texture2D Screenshot;
 	private string Screen_Shot_File_Name;
 	private bool mode2D;
-	public Texture markerTex;
+//	public Texture markerTex;
 	private int pointIndex;
 	/// <summary>
 	/// Amount of invisble markers to place ==> higher is preciser yet heavier? ==> BENCHMARK!
@@ -124,17 +107,16 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 	/// Start this instance.
 	/// </summary>
 	private string text;
-	private int counter;
-	public Texture2D Screenshot2;
 	private bool ScreenshotReady;
 	private bool circle;
 	private List<Vector2> lineList;
+
 	public void Start ()
 	{
 		GUI.color = Color.black;
 		m_tangoApplication = FindObjectOfType<TangoApplication> ();
 		m_tangoApplication.Register (this);
-		markerTex = FindObjectOfType<Texture> ();
+//		markerTex = FindObjectOfType<Texture> ();
 		points = new Vector3[4];
 		m_i = 0;
 		Line = new List<Vector3> ();
@@ -163,13 +145,13 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 			300,
 			UI_LABEL_SIZE_Y);
 		screenOverlay = new Rect (0, 0, Screen.width, Screen.height);
-		counter = 0;
 		ScreenshotReady = false;
 
 		GridCalculations ();
 
 		lineList = new List<Vector2> ();
 		circle = false; 
+
 	}
 
 	/// <summary>
@@ -223,13 +205,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 			// do nothing
 			}
 		}
-		///////////////////////
-//		if (Input.GetMouseButtonDown (0)) {
-//			
-//			if (shot_taken) {
-//				StartCoroutine (_WaitForDepth (Input.mousePosition));
-//			} 
-//		}
 		if (Input.GetKey (KeyCode.Escape)) {
 			// This is a fix for a lifecycle issue where calling
 			// Application.Quit() here, and restarting the application
@@ -255,7 +230,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 //					"<size=25>" + DotMarkerInvisible.Length.ToString () + "</size>");
 
 				GUI.color = Color.white;
-				if (shot_taken && ScreenshotReady) {
+				if (shot_taken) {
 					//Color colPreviousGUIColor = GUI.color;
 					//GUI.color = new Color (colPreviousGUIColor.r, colPreviousGUIColor.g, colPreviousGUIColor.b, 1f);
 
@@ -351,15 +326,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 			yield return null;
 		}
 
-		m_tangoApplication.SetDepthCameraRate (
-			TangoEnums.TangoDepthCameraRate.DISABLED);
-//		int distance;
-		//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisble grid.
-//		if (Screen.height > Screen.width)
-//			distance = (int)Screen.width / 8 - margin;
-//		else
-//			distance = (int)Screen.height / 8 - margin;
-//			distance = (int)Math.Sqrt((float)Math.Pow((float)Screen.width/8f,2f)+(float)Math.Pow((float)Screen.height/8f,2f));// ==> teveel overlap met schuine!
+		m_tangoApplication.SetDepthCameraRate (TangoEnums.TangoDepthCameraRate.DISABLED);
 		Camera cam = Camera.main;
 		pointIndex = m_pointCloud.FindClosestPoint(cam, touchPosition, 10);
 		Vector3 lastPoint = m_pointCloud.m_points [pointIndex];
@@ -372,11 +339,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 	{
 		//enable linerenderer
 		m_lineRenderer.enabled = true;
-		Vector2 lastPointScreen = Input.mousePosition;
-//		for (int i = 0; i < lineList.Count; i++) {
-//			Line.Add (new Vector3(lastPoint.x+(lastPointScreen.x-lineList[i].x)/Screen.width, lastPoint.y+(Screen.height-lastPointScreen.y-lineList[i].y)/Screen.height, lastPoint.z ));
-//		}
-
 		Line.Add (lastPoint);
 		positionsOfPoints = Line.ToArray ();
 		m_lineRenderer.numPositions = positionsOfPoints.Length; // add this
@@ -486,14 +448,16 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 		//get rid of screenshot overlay by falsifying the screenshotBoolean
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
 		ScreenshotReady = false;
+		//Application.CaptureScreenshot (Screen_Shot_File_Name);
+		//StartCoroutine(screenShotCoroutine());
 		if(System.IO.File.Exists (Path_Name)) {
 			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
 			Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
 			ScreenshotReady = Screenshot.LoadImage (Bytes_File);
 
 		}	
-//		while (!ScreenshotReady) {
-//		}
+		while (!ScreenshotReady) {
+		}
 
 		shot_taken = !shot_taken;
 
@@ -504,11 +468,17 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 		if (System.IO.File.Exists (Path_Name)) {
 			System.IO.File.Delete (Path_Name);
 		}
-		ClearPoints ();
+
 		ScreenshotReady = false;
-		//Screenshot = null;
-		Application.CaptureScreenshot (Screen_Shot_File_Name);
-		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// 		//Create new thread then save image to file
+		new System.Threading.Thread(() =>
+			{
+				System.Threading.Thread.Sleep(100);
+				Application.CaptureScreenshot (Screen_Shot_File_Name);
+			}).Start();
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		FillGrid ();
 		if(System.IO.File.Exists (Path_Name)) {
 			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
@@ -516,9 +486,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth //MonoBe
 			ScreenshotReady = Screenshot.LoadImage (Bytes_File);
 
 		}	
-
-		//GetComponent<Renderer> ().material.mainTexture = Screenshot;
-		//shot_taken = true;
 	}
 
 	/// @endcond
