@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Tango;
 
-public class MultiPointHelp : MonoBehaviour {
+public class MultiPointHelp : MonoBehaviour
+{
 	/// <summary>
 	/// The dot marker object for the VISIBLE points.
 	/// </summary>
@@ -56,22 +57,26 @@ public class MultiPointHelp : MonoBehaviour {
 	/// </summary>
 	private TangoApplication m_tangoApplication;
 	// Use this for initialization
-	void Start () {
+	void Start ()
+	{
 		m_tangoApplication = FindObjectOfType<TangoApplication> ();
 		m_tangoApplication.Register (this);
 		tempPoints = new GameObject[GRID_SIZE];
 		points = new Vector3[GRID_SIZE];
 		DotMarkerInvisible = new GameObject[GRID_SIZE];
 		ScreenshotReady = false;
-		m_lineRenderer = FindObjectOfType<LineRenderer>();
+		m_lineRenderer = FindObjectOfType<LineRenderer> ();
 		m_lineRenderer.enabled = false;
 		tmpLine = new List<Vector3> ();
+		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+	{
 		
 	}
+
 	/// <summary>
 	/// Places the markerdots.
 	/// </summary>
@@ -82,6 +87,7 @@ public class MultiPointHelp : MonoBehaviour {
 		tempPoints [m_i].tag = strmarker;
 		return tempPoints [m_i];
 	}
+
 	/// <summary>
 	/// Fills the grid.
 	/// GameObject[] DotMarkerInvisible keeps track of where in absolute coords we've placed invisible markers
@@ -105,6 +111,7 @@ public class MultiPointHelp : MonoBehaviour {
 			}
 		}
 	}
+
 	public void GridCalculations ()
 	{
 		GridPosition = new Vector2[GRID_SIZE];
@@ -153,30 +160,42 @@ public class MultiPointHelp : MonoBehaviour {
 	/// <summary>
 	/// Clears the Marker dots & the line renderer.
 	/// </summary>
-	public void ClearPoints ()
+	public bool ClearPoints (string[] type)
 	{
+		
 		tmpLine.Clear ();
 		m_lineRenderer.enabled = false;
 		m_i = 0;
 		// remove all game objects based on marker tag
-		GameObject[] enemies = GameObject.FindGameObjectsWithTag ("marker");
-		foreach (GameObject enemy in enemies) {
-			GameObject.Destroy (enemy);
+		foreach (string t in type){
+			GameObject[] enemies = GameObject.FindGameObjectsWithTag (t);
+			foreach (GameObject enemy in enemies) {
+				GameObject.Destroy (enemy);
+			}
 		}
-		enemies = GameObject.FindGameObjectsWithTag ("marker_invisible");
-		foreach (GameObject enemy in enemies) {
-			GameObject.Destroy (enemy);
-		}
+
+//		GameObject[] enemies = GameObject.FindGameObjectsWithTag ("marker");
+//		foreach (GameObject enemy in enemies) {
+//			GameObject.Destroy (enemy);
+//		}
+//		if (all) {
+//			enemies = GameObject.FindGameObjectsWithTag ("marker_invisible");
+//			foreach (GameObject enemy in enemies) {
+//				GameObject.Destroy (enemy);
+//			}
+//		}
 		//clear points array (CORRECT WAY?)
 		tempPoints = new GameObject[GRID_SIZE];
+		return true;
 	}
 
 	public void screenCap ()
 	{			
 		// We turn the screenshot on or off
 		//get rid of screenshot overlay by falsifying the screenshotBoolean
-		ClearPoints();
-		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
+
+		//remove any previously placed visible markers
+		ClearPoints (new string[]{"circle","marker"});
 		ScreenshotReady = false;
 		if (System.IO.File.Exists (Path_Name)) {
 			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
@@ -188,20 +207,20 @@ public class MultiPointHelp : MonoBehaviour {
 
 	public void newScreenCap ()
 	{
-		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
 		if (System.IO.File.Exists (Path_Name)) {
 			System.IO.File.Delete (Path_Name);
 		}
 
 		ScreenshotReady = false;
 		//Application.CaptureScreenshot (Screen_Shot_File_Name);
+		//Faster method, more prone to shaking...
 		FillGrid (DotMarkerInvisible);
-		Texture2D screenShot2 = new Texture2D(Screen.width, Screen.height);
-		screenShot2.ReadPixels(new Rect(0,0,Screen.width,Screen.height),0,0);
-		screenShot2.Apply();
-		byte[] bytes = screenShot2.EncodeToPNG();
-		screenShot2=null;
-		System.IO.File.WriteAllBytes(Path_Name, bytes);
+		Texture2D screenShot2 = new Texture2D (Screen.width, Screen.height);
+		screenShot2.ReadPixels (new Rect (0, 0, Screen.width, Screen.height), 0, 0);
+		screenShot2.Apply ();
+		byte[] bytes = screenShot2.EncodeToPNG ();
+		Destroy(screenShot2);
+		System.IO.File.WriteAllBytes (Path_Name, bytes);
 	}
 
 	/// <summary>
@@ -210,11 +229,10 @@ public class MultiPointHelp : MonoBehaviour {
 	/// <returns>The dots.</returns>
 	public GameObject enableDot (int pointIndex)
 	{
-		Vector3 pos = new Vector3();
+		Vector3 pos = new Vector3 ();
 		if (shot_taken) {
 			pos = DotMarkerInvisible [pointIndex].transform.position;
-		}
-		else		{
+		} else {
 			pos = m_pointCloud.m_points [pointIndex];
 		}
 		GameObject test = (GameObject)Instantiate (DotMarker);
@@ -222,6 +240,7 @@ public class MultiPointHelp : MonoBehaviour {
 		test.tag = "marker";
 		return test;
 	}
+
 	public void UpdateCircle (Vector3 lastPoint)
 	{
 		
@@ -231,7 +250,8 @@ public class MultiPointHelp : MonoBehaviour {
 		positionsOfPoints = tmpLine.ToArray ();
 		m_lineRenderer.numPositions = positionsOfPoints.Length; // add this
 		m_lineRenderer.SetPositions (positionsOfPoints);
-	} 
+	}
+
 	public void UpdateLine ()
 	{
 		//enable linerenderer

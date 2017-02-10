@@ -28,11 +28,11 @@ using System.Threading;
 /// <summary>
 /// GUI controller to show distance data.
 /// </summary>
-public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth 
+public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 {
 	// Constant values for overlay.
 	public const float UI_LABEL_START_X = 15.0f;
-	public const float UI_LABEL_START_Y = 40.0f;
+	public const float UI_LABEL_START_Y = 300.0f;
 	public const float UI_LABEL_SIZE_X = 1920.0f;
 	public const float UI_LABEL_SIZE_Y = 100.0f;
 
@@ -70,8 +70,20 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// Start this instance.
 	/// </summary>
 	private string text;
-	private bool circle;
-	//private List<Vector2> lineList;
+	//	private bool circle;
+
+	public Texture2D[] cycleButtons;
+	public Texture2D screenGrab;
+	public Texture2D[] toggleGrid;
+	public Texture2D clearButton;
+	private Int16 grid;
+	private Int16 draw_mode;
+	private bool inGUILoop;
+
+	/// <summary>
+	/// The marker prefab to place on taps.
+	/// </summary>
+	public GameObject m_prefabMarker;
 
 	public void Start ()
 	{
@@ -80,8 +92,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		m_tangoApplication.Register (this);
 
 		m_help.m_i = 0;
-		//Line = new List<Vector3> ();
-		//lineList = new List<Vector2> ();
 		m_help.shot_taken = false;
 		m_help.Screen_Shot_File_Name = "test.png";
 
@@ -94,23 +104,23 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		m_help.m_pointCloud = m_pointCloud;
 
 		buttonRect = new Rect (UI_LABEL_START_X,
-			UI_LABEL_START_Y,
+			45.0f,
 			300,
-			UI_LABEL_SIZE_Y);
+			300);
 		buttonRect2 = new Rect (UI_LABEL_START_X,
-			UI_LABEL_START_Y * 5,
+			UI_LABEL_START_Y + 45.0f,
 			300,
-			UI_LABEL_SIZE_Y);
+			300);
 		buttonRect3 = new Rect (UI_LABEL_START_X,
-			UI_LABEL_START_Y * 9,
+			UI_LABEL_START_Y * 2 + 45.0f,
 			300,
-			UI_LABEL_SIZE_Y);
+			300);
 		screenOverlay = new Rect (0, 0, Screen.width, Screen.height);
 		// keep track of positions of screen to place markers if necessary (rectangle option)
 		m_help.GridCalculations ();
-
-
-		circle = false; 
+		draw_mode = 0;
+		text = "naast buttons";
+		inGUILoop = false;
 	}
 
 	/// <summary>
@@ -132,40 +142,61 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	public void Update ()
 	{
-		///////////////////////
-		Vector2 tmp;
-		tmp = Input.mousePosition;
-		tmp.y = Screen.height - tmp.y;
-
-		if (Input.GetMouseButtonDown (0)) {
-			if (!circle) {
-				//if (ScreenshotReady) {
-				StartCoroutine (_WaitForDepth (Input.mousePosition));
-				//} 
-			} else {
-				//lineList.Clear ();
-//				lineList.Add (tmp);
+		//Rectangles use a different AXIS system than mouse position on screen (inverse y)
+		Vector3 muis = new Vector3 (Input.mousePosition.x, Screen.height - Input.mousePosition.y, Input.mousePosition.z);
+		Rect rect = new Rect(0, 0, Screen.width, Screen.height);
+		if (rect.Contains(muis))
+			text = "muis in scherm "+muis.ToString();
+		if(buttonRect.Contains(muis))
+			text = "button 1 "+muis.ToString();
+		if(buttonRect2.Contains(muis))
+			text = "button 2 "+muis.ToString();
+		if(buttonRect3.Contains(muis))
+			text = "button 3 "+muis.ToString();
+		// It's better to keep the mousebutton effects in the update method as this works faster than the onGUI class
+		switch (draw_mode) {
+		case 0:
+			if (Input.GetMouseButtonDown (0)) {
+				if (!buttonRect2.Contains (muis)) {
+					StartCoroutine (_WaitForDepth (Input.mousePosition));
+				}
+				break;
+			}
+			if (Input.GetMouseButtonUp (0)) {
+				// do nothing
+			}
+			if (Input.GetMouseButton (0)) {
+				// do nothing
+			}
+			break;
+		case 1:
+			if (Input.GetMouseButtonDown (0)) {
+				if (!buttonRect2.Contains (muis)) {
+					StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
+				}
+				break;
+			}
+			if (Input.GetMouseButtonUp (0)) {
+				
+			}
+			if (Input.GetMouseButton (0)) {
+			}
+			break;
+		case 2:
+			if (Input.GetMouseButtonDown (0)) {
 				m_help.tmpLine.Clear ();
-				StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
-				// start new instance of LineList & Line, get a new LineRenderer
+				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+			}
+			if (Input.GetMouseButtonUp (0)) {
+				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+			}
+			if (Input.GetMouseButton (0)) {
+				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+			}
 
-			}
-		}
+			break;
 
-		if (Input.GetMouseButtonUp (0)) {
-			if (circle) {
-				StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
-			} else {
-				// do nothing
-			}
-		}
-		if (Input.GetMouseButton (0)) {
-			if (circle) {
-//				lineList.Add (tmp);
-				StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
-			} else {
-				// do nothing
-			}
+
 		}
 		if (Input.GetKey (KeyCode.Escape)) {
 			// This is a fix for a lifecycle issue where calling
@@ -180,46 +211,109 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	public void OnGUI ()
 	{
-		text = "Pic not taken yet";
+		//text = "Pic not taken yet";
 		if (m_tangoApplication.HasRequestedPermissions ()) {
-			if (!circle) {
 				GUI.color = Color.white;
+				GUI.backgroundColor = Color.clear;
 				if (m_help.shot_taken) {
-					GUI.DrawTexture (screenOverlay, m_help.Screenshot);
+					grid = 1;
+				} else {
+					grid = 0;
 				}
-
-				#pragma warning disable 618
-				if (GUI.Button (buttonRect, "<size=25>" + "Circle?" + "</size>")) {
-					// Function to clear the points entered (actually reposition the index)
-					circle = true;
-				}
-				if (GUI.Button (buttonRect2, "<size=25>" + "ScreenCap" + "</size>")) {
-					// Function to clear the points entered (actually reposition the index)
-					m_help.screenCap ();
-				}
-				if (GUI.Button (buttonRect3, "<size=20>" + "new screencap" + "</size>")) {
-					m_help.ClearPoints ();
-					m_help.newScreenCap ();
-				}
-				#pragma warning restore 618
-
-				GUI.Label (new Rect (500.0f,
-					UI_LABEL_START_Y,
+				GUI.Label (new Rect (300.0f,
+					45.0f,
 					500.0f,
 					200.0f),
 					"<size=25>" + text + "</size>");
-			} else {
-				if (GUI.Button (buttonRect, "<size=25>" + "rectangle?" + "</size>")) {
-					circle = false;
-				}
-				if (GUI.Button (buttonRect2, "<size=25>" + "Clear" + "</size>")) {
-					// Function to clear the points entered (actually reposition the index)
-					m_help.ClearPoints ();
+				switch (draw_mode) {
+				case 0:
+				#pragma warning disable 618
+					if (m_help.shot_taken) {
+						GUI.DrawTexture (screenOverlay, m_help.Screenshot);
+					} 
+					if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
+						// Function to clear the points entered (actually reposition the index)
+						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+						draw_mode++;
+						break;
+					} 
+					if (GUI.Button (buttonRect2, toggleGrid [grid])) {
+						// Function to clear the points entered (actually reposition the index)
+						m_help.screenCap ();
+						break;
+					} 
+					if (GUI.Button (buttonRect3, screenGrab)) {
+						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+						m_help.newScreenCap ();
+						break;
+					}
+//					if (Input.GetMouseButtonDown (0)) {
+//						StartCoroutine (_WaitForDepth (Input.mousePosition));
+//						break;
+//					}
+//					if (Input.GetMouseButtonUp (0)) {
+//						// do nothing
+//					}
+//					if (Input.GetMouseButton (0)) {
+//						// do nothing
+//					}
+						
+				
+				#pragma warning restore 618
+					break;
+				case 1:
+					if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
+						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+						draw_mode++;
+						break;
+					} 
+					if (GUI.Button (buttonRect2, clearButton)) {
+						// Function to clear the points entered (actually reposition the index)
+						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+						break;
+					} 
+
+//					if (Input.GetMouseButtonDown (0)) {
+//						StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
+//						break;
+//					}
+//					if (Input.GetMouseButtonUp (0)) {
+//
+//					}
+//					if (Input.GetMouseButton (0)) {
+//					}
+
+					break;
+				case 2:
+					if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
+						draw_mode = 0;
+						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					} 
+					if (GUI.Button (buttonRect2, clearButton)) {
+						// Function to clear the points entered (actually reposition the index)
+						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					} 
+//					if (Input.GetMouseButtonDown (0)) {
+//						m_help.tmpLine.Clear ();
+//						StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+//					}
+//					if (Input.GetMouseButtonUp (0)) {
+//						StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+//					}
+//					if (Input.GetMouseButton (0)) {
+//						StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+//					}
+//					
+				
+					break;
+				default:
+					draw_mode = 1;
+					break;
 				}
 			}
 		}
 
-	}
+
 
 	/// <summary>
 	/// This is called each time new depth data is available.
@@ -256,7 +350,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	/// <param name="touchPosition">Touch position on the screen.</param>
 	/// <returns>Coroutine IEnumerator.</returns>
-	private IEnumerator _WaitForDepthCircle (Vector2 touchPosition)
+	private IEnumerator _WaitForDepthFreeDraw (Vector2 touchPosition)
 	{
 		m_waitingForDepth = true;
 		// Turn on the camera and wait for a single depth update
@@ -274,6 +368,41 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		}
 	}
 
+	private IEnumerator _WaitForDepthCircle (Vector2 touchPosition)
+	{
+		m_waitingForDepth = true;
+
+		// Turn on the camera and wait for a single depth update.
+		m_tangoApplication.SetDepthCameraRate (TangoEnums.TangoDepthCameraRate.MAXIMUM);
+		while (m_waitingForDepth) {
+			yield return null;
+		}
+
+		m_tangoApplication.SetDepthCameraRate (TangoEnums.TangoDepthCameraRate.DISABLED);
+
+		// Find the plane.
+		Camera cam = Camera.main;
+		Vector3 planeCenter;
+		Plane plane;
+		if (!m_pointCloud.FindPlane (cam, touchPosition, out planeCenter, out plane)) {
+			yield break;
+		}
+
+		// Ensure the location is always facing the camera.  This is like a LookRotation, but for the Y axis.
+		Vector3 up = plane.normal;
+		Vector3 forward;
+		if (Vector3.Angle (plane.normal, cam.transform.forward) < 175) {
+			Vector3 right = Vector3.Cross (up, cam.transform.forward).normalized;
+			forward = Vector3.Cross (right, up).normalized;
+		} else {
+			// Normal is nearly parallel to camera look direction, the cross product would have too much
+			// floating point error in it.
+			forward = Vector3.Cross (up, cam.transform.right);
+		}
+
+		GameObject tmp = Instantiate (m_prefabMarker, planeCenter, Quaternion.LookRotation (forward, up));
+		tmp.tag = "circle";
+	}
 
 	/// <summary>
 	/// Wait for the next depth update, then find the nearest point in the point
@@ -302,7 +431,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		distance = (int)Math.Sqrt ((float)Math.Pow ((float)Screen.width / 8f, 2f) + (float)Math.Pow ((float)Screen.height / 8f, 2f));// ==> teveel overlap met schuine!
 		//With screenoverlay
 		if (m_help.shot_taken) {
-			//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisble grid.
+			//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisible grid.
 			//		if (Screen.height > Screen.width)
 			//			distance = (int)Screen.width / 8 - margin;
 			//		else
