@@ -77,8 +77,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	public Texture2D[] toggleGrid;
 	public Texture2D clearButton;
 	private Int16 grid;
-	private Int16 draw_mode;
-	private bool inGUILoop;
+	public Int16 draw_mode;
 
 	/// <summary>
 	/// The marker prefab to place on taps.
@@ -119,8 +118,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		// keep track of positions of screen to place markers if necessary (rectangle option)
 		m_help.GridCalculations ();
 		draw_mode = 0;
-		text = "naast buttons";
-		inGUILoop = false;
 	}
 
 	/// <summary>
@@ -144,15 +141,15 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	{
 		//Rectangles use a different AXIS system than mouse position on screen (inverse y)
 		Vector3 muis = new Vector3 (Input.mousePosition.x, Screen.height - Input.mousePosition.y, Input.mousePosition.z);
-		Rect rect = new Rect(0, 0, Screen.width, Screen.height);
-		if (rect.Contains(muis))
-			text = "muis in scherm "+muis.ToString();
-		if(buttonRect.Contains(muis))
-			text = "button 1 "+muis.ToString();
-		if(buttonRect2.Contains(muis))
-			text = "button 2 "+muis.ToString();
-		if(buttonRect3.Contains(muis))
-			text = "button 3 "+muis.ToString();
+//		Rect rect = new Rect(0, 0, Screen.width, Screen.height);
+//		if (rect.Contains(muis))
+//			text = "muis in scherm "+muis.ToString();
+//		if(buttonRect.Contains(muis))
+//			text = "button 1 "+muis.ToString();
+//		if(buttonRect2.Contains(muis))
+//			text = "button 2 "+muis.ToString();
+//		if(buttonRect3.Contains(muis))
+//			text = "button 3 "+muis.ToString();
 		// It's better to keep the mousebutton effects in the update method as this works faster than the onGUI class
 		switch (draw_mode) {
 		case 0:
@@ -160,7 +157,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				if (!buttonRect2.Contains (muis)) {
 					StartCoroutine (_WaitForDepth (Input.mousePosition));
 				}
-				break;
 			}
 			if (Input.GetMouseButtonUp (0)) {
 				// do nothing
@@ -172,6 +168,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		case 1:
 			if (Input.GetMouseButtonDown (0)) {
 				if (!buttonRect2.Contains (muis)) {
+					
 					StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
 				}
 				break;
@@ -185,10 +182,17 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		case 2:
 			if (Input.GetMouseButtonDown (0)) {
 				m_help.tmpLine.Clear ();
+
 				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
 			}
 			if (Input.GetMouseButtonUp (0)) {
-				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+				if (!buttonRect2.Contains (muis)) {
+					m_help.newLineRenderer ();
+					m_help.placeNumber (m_help.FreeDrawText, m_help.sum, new Quaternion (0, 0, 0, 1));
+
+				}
+
+				
 			}
 			if (Input.GetMouseButton (0)) {
 				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
@@ -213,40 +217,41 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	{
 		//text = "Pic not taken yet";
 		if (m_tangoApplication.HasRequestedPermissions ()) {
-				GUI.color = Color.white;
-				GUI.backgroundColor = Color.clear;
-				if (m_help.shot_taken) {
-					grid = 1;
-				} else {
-					grid = 0;
-				}
-				GUI.Label (new Rect (300.0f,
+			GUI.color = Color.white;
+			GUI.backgroundColor = Color.clear;
+			if (m_help.shot_taken) {
+				grid = 1;
+			} else {
+				grid = 0;
+			}
+			text = m_help.sum.ToString();
+			GUI.Label (new Rect (300.0f,
 					45.0f,
 					500.0f,
 					200.0f),
 					"<size=25>" + text + "</size>");
-				switch (draw_mode) {
-				case 0:
+			switch (draw_mode) {
+			case 0:
 				#pragma warning disable 618
-					if (m_help.shot_taken) {
-						GUI.DrawTexture (screenOverlay, m_help.Screenshot);
-					} 
-					if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
-						// Function to clear the points entered (actually reposition the index)
-						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
-						draw_mode++;
-						break;
-					} 
-					if (GUI.Button (buttonRect2, toggleGrid [grid])) {
-						// Function to clear the points entered (actually reposition the index)
-						m_help.screenCap ();
-						break;
-					} 
-					if (GUI.Button (buttonRect3, screenGrab)) {
-						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
-						m_help.newScreenCap ();
-						break;
-					}
+				if (m_help.shot_taken) {
+					GUI.DrawTexture (screenOverlay, m_help.Screenshot);
+				} 
+				if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
+					// Function to clear the points entered (actually reposition the index)
+					m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					draw_mode++;
+					break;
+				} 
+				if (GUI.Button (buttonRect2, toggleGrid [grid])) {
+					// Function to clear the points entered (actually reposition the index)
+					m_help.screenCap ();
+					break;
+				} 
+				if (GUI.Button (buttonRect3, screenGrab)) {
+					m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					m_help.newScreenCap ();
+					break;
+				}
 //					if (Input.GetMouseButtonDown (0)) {
 //						StartCoroutine (_WaitForDepth (Input.mousePosition));
 //						break;
@@ -260,18 +265,18 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 						
 				
 				#pragma warning restore 618
+				break;
+			case 1:
+				if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
+					m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					draw_mode++;
 					break;
-				case 1:
-					if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
-						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
-						draw_mode++;
-						break;
-					} 
-					if (GUI.Button (buttonRect2, clearButton)) {
-						// Function to clear the points entered (actually reposition the index)
-						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
-						break;
-					} 
+				} 
+				if (GUI.Button (buttonRect2, clearButton)) {
+					// Function to clear the points entered (actually reposition the index)
+					m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					break;
+				} 
 
 //					if (Input.GetMouseButtonDown (0)) {
 //						StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
@@ -283,16 +288,16 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 //					if (Input.GetMouseButton (0)) {
 //					}
 
-					break;
-				case 2:
-					if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
-						draw_mode = 0;
-						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
-					} 
-					if (GUI.Button (buttonRect2, clearButton)) {
-						// Function to clear the points entered (actually reposition the index)
-						m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
-					} 
+				break;
+			case 2:
+				if (GUI.Button (buttonRect, cycleButtons [draw_mode])) {
+					draw_mode = 0;
+					m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+				} 
+				if (GUI.Button (buttonRect2, clearButton)) {
+					// Function to clear the points entered (actually reposition the index)
+					m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+				} 
 //					if (Input.GetMouseButtonDown (0)) {
 //						m_help.tmpLine.Clear ();
 //						StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
@@ -305,13 +310,13 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 //					}
 //					
 				
-					break;
-				default:
-					draw_mode = 1;
-					break;
-				}
+				break;
+			default:
+				draw_mode = 1;
+				break;
 			}
 		}
+	}
 
 
 
@@ -364,7 +369,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		pointIndex = m_pointCloud.FindClosestPoint (cam, touchPosition, 10);
 		Vector3 worldTouchPoint = m_pointCloud.m_points [pointIndex];
 		if (pointIndex > -1) {
-			m_help.UpdateCircle (worldTouchPoint);
+			m_help.UpdateFreeDraw (worldTouchPoint);
 		}
 	}
 
@@ -401,6 +406,11 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		}
 
 		GameObject tmp = Instantiate (m_prefabMarker, planeCenter, Quaternion.LookRotation (forward, up));
+		TextMesh markerText = (TextMesh)Instantiate (m_help.Text3D);
+
+		//place number next to it
+		m_help.placeNumber (markerText, planeCenter, Quaternion.LookRotation (forward, up));
+		m_help.LineRendererIndex++;
 		tmp.tag = "circle";
 	}
 
@@ -446,7 +456,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			if (m_help.m_i < 3) {
 				m_help.m_i++;
 			} else {
-				m_help.UpdateLine ();
+				m_help.UpdateRectangle ();
 				m_help.m_i++;
 			}
 		}

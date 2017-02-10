@@ -18,6 +18,8 @@ public class MultiPointHelp : MonoBehaviour
 	/// The line renderer to draw a line between two points.
 	/// </summary>
 	public LineRenderer m_lineRenderer;
+	private LineRenderer[] m_lineRendererList;
+	public int LineRendererIndex;
 	private string Path_Name;
 	public string Screen_Shot_File_Name;
 
@@ -43,11 +45,18 @@ public class MultiPointHelp : MonoBehaviour
 	/// Amount of invisble markers to place ==> higher is preciser yet heavier? ==> BENCHMARK!
 	/// </summary>
 	private const int GRID_SIZE = 144;
-	private bool ScreenshotReady;
+//	private bool ScreenshotReady;
 	public Texture2D Screenshot;
 	private Vector3[] positionsOfPoints;
 	public bool shot_taken;
 	public List<Vector3> tmpLine;
+	public bool new_circle;
+	public TextMesh Text3D;
+	public TextMesh FreeDrawText;
+	/// <summary>
+	/// sum of all points in free draw to center number (text)
+	/// </summary>
+	public Vector3 sum;
 	/// <summary>
 	///  counter for amount of dots
 	/// </summary>
@@ -59,16 +68,22 @@ public class MultiPointHelp : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+		LineRendererIndex = 0;
+		m_lineRendererList = new LineRenderer[20]; 
 		m_tangoApplication = FindObjectOfType<TangoApplication> ();
 		m_tangoApplication.Register (this);
 		tempPoints = new GameObject[GRID_SIZE];
 		points = new Vector3[GRID_SIZE];
 		DotMarkerInvisible = new GameObject[GRID_SIZE];
-		ScreenshotReady = false;
-		m_lineRenderer = FindObjectOfType<LineRenderer> ();
-		m_lineRenderer.enabled = false;
+//		ScreenshotReady = false;
+		m_lineRendererList[LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		FreeDrawText = (TextMesh)Instantiate (Text3D);
+			//FindObjectOfType<LineRenderer> ();
+		m_lineRendererList[LineRendererIndex].enabled = false;
 		tmpLine = new List<Vector3> ();
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
+		new_circle = true;
+
 	}
 	
 	// Update is called once per frame
@@ -162,9 +177,13 @@ public class MultiPointHelp : MonoBehaviour
 	/// </summary>
 	public bool ClearPoints (string[] type)
 	{
-		
 		tmpLine.Clear ();
-		m_lineRenderer.enabled = false;
+		foreach (LineRenderer lr in m_lineRendererList) {
+			LineRenderer.Destroy(lr);
+		}
+		LineRendererIndex = 0;
+		m_lineRendererList[LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		m_lineRendererList[LineRendererIndex].enabled = false;
 		m_i = 0;
 		// remove all game objects based on marker tag
 		foreach (string t in type){
@@ -193,35 +212,38 @@ public class MultiPointHelp : MonoBehaviour
 	{			
 		// We turn the screenshot on or off
 		//get rid of screenshot overlay by falsifying the screenshotBoolean
-
-		//remove any previously placed visible markers
-		ClearPoints (new string[]{"circle","marker"});
-		ScreenshotReady = false;
 		if (System.IO.File.Exists (Path_Name)) {
 			byte[] Bytes_File = System.IO.File.ReadAllBytes (Path_Name);
 			Screenshot = new Texture2D (0, 0, TextureFormat.RGBA32, false);
-			ScreenshotReady = Screenshot.LoadImage (Bytes_File);
+			Screenshot.LoadImage (Bytes_File);
 		}	
 		shot_taken = !shot_taken;
 	}
+	public void newLineRenderer(){
 
+		LineRendererIndex++;
+		m_lineRendererList[LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		FreeDrawText = (TextMesh)Instantiate (Text3D);
+		m_lineRendererList[LineRendererIndex].enabled = false;
+		}
 	public void newScreenCap ()
 	{
 		if (System.IO.File.Exists (Path_Name)) {
 			System.IO.File.Delete (Path_Name);
 		}
-
-		ScreenshotReady = false;
-		//Application.CaptureScreenshot (Screen_Shot_File_Name);
+		Application.CaptureScreenshot (Screen_Shot_File_Name);
 		//Faster method, more prone to shaking...
 		FillGrid (DotMarkerInvisible);
-		Texture2D screenShot2 = new Texture2D (Screen.width, Screen.height);
-		screenShot2.ReadPixels (new Rect (0, 0, Screen.width, Screen.height), 0, 0);
-		screenShot2.Apply ();
-		byte[] bytes = screenShot2.EncodeToPNG ();
-		Destroy(screenShot2);
-		System.IO.File.WriteAllBytes (Path_Name, bytes);
+		//ERROR: ReadPixels was called to read pixels from system frame buffer, while not inside drawing frame.
+		//UnityEngine.Texture2D:ReadPixels(Rect, Int32, Int32)
+//		Texture2D screenShot2 = new Texture2D (Screen.width, Screen.height);
+//		screenShot2.ReadPixels (new Rect (0, 0, Screen.width, Screen.height), 0, 0);
+//		screenShot2.Apply ();
+//		byte[] bytes = screenShot2.EncodeToPNG ();
+//		Destroy(screenShot2);
+//		System.IO.File.WriteAllBytes (Path_Name, bytes);
 	}
+	 
 
 	/// <summary>
 	/// Enables the dots which are being approx tapped .
@@ -241,28 +263,43 @@ public class MultiPointHelp : MonoBehaviour
 		return test;
 	}
 
-	public void UpdateCircle (Vector3 lastPoint)
+	public void UpdateFreeDraw (Vector3 lastPoint)
 	{
-		
+
 		//enable linerenderer
-		m_lineRenderer.enabled = true;
+		m_lineRendererList[LineRendererIndex].enabled = true;
 		tmpLine.Add (lastPoint);
 		positionsOfPoints = tmpLine.ToArray ();
-		m_lineRenderer.numPositions = positionsOfPoints.Length; // add this
-		m_lineRenderer.SetPositions (positionsOfPoints);
+		m_lineRendererList[LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
+		m_lineRendererList[LineRendererIndex].SetPositions (positionsOfPoints);
+		sum=new Vector3(0,0,0);
+		foreach (Vector3 tmp in positionsOfPoints) {
+			sum += tmp;
+
+		}
+		sum = sum / positionsOfPoints.Length;
+		placeNumber (FreeDrawText, sum, new Quaternion (0, 0, 0, 1));
 	}
 
-	public void UpdateLine ()
+	public void UpdateRectangle ()
 	{
 		//enable linerenderer
-		m_lineRenderer.enabled = true;
+		m_lineRendererList[LineRendererIndex].enabled = true;
 		GameObject[] DotList = GameObject.FindGameObjectsWithTag ("marker");
 		foreach (GameObject t in DotList) {
 			tmpLine.Add (t.transform.position);
 		}
 		tmpLine.Add (DotList [0].transform.position);
 		positionsOfPoints = tmpLine.ToArray ();
-		m_lineRenderer.numPositions = positionsOfPoints.Length; // add this
-		m_lineRenderer.SetPositions (positionsOfPoints);
+		m_lineRendererList[LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
+		m_lineRendererList[LineRendererIndex].SetPositions (positionsOfPoints);
+	}
+	public void placeNumber(TextMesh tmp, Vector3 numberpoint, Quaternion orientation)
+	{
+		tmp.text = LineRendererIndex.ToString ();
+		tmp.transform.position = numberpoint;
+		tmp.transform.localRotation = orientation;
+		tmp.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+		tmp.tag = "marker";
 	}
 }
