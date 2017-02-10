@@ -3,14 +3,9 @@
 
 ###Issues
 2. Screenshot copy should show markers on top ==> Show2DDots
-3. screenshot should open automatically
-4. no first marker when pushing the GUI button to record screenshot! ==> 
-5. when renewing screenshot extra markers added, should remove previous!
 
 ###To Do
 'Multiplayer' setup: Helpuser shares a 'game' with assistant
-
-draw circle instead of square dots?
 
 Assistant creates screenshot and copy of camera to be able to point at an easy pace the workspot to be taken into account. Helper sees markernotations
 
