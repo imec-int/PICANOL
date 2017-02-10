@@ -140,67 +140,53 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	public void Update ()
 	{
 		//Rectangles use a different AXIS system than mouse position on screen (inverse y)
-		Vector3 muis = new Vector3 (Input.mousePosition.x, Screen.height - Input.mousePosition.y, Input.mousePosition.z);
-//		Rect rect = new Rect(0, 0, Screen.width, Screen.height);
-//		if (rect.Contains(muis))
-//			text = "muis in scherm "+muis.ToString();
-//		if(buttonRect.Contains(muis))
-//			text = "button 1 "+muis.ToString();
-//		if(buttonRect2.Contains(muis))
-//			text = "button 2 "+muis.ToString();
-//		if(buttonRect3.Contains(muis))
-//			text = "button 3 "+muis.ToString();
+		Vector3 mouse = new Vector3 (Input.mousePosition.x, Screen.height - Input.mousePosition.y, Input.mousePosition.z);
+		bool noButton = !buttonRect2.Contains (mouse) && !buttonRect.Contains (mouse) && !buttonRect3.Contains (mouse);
 		// It's better to keep the mousebutton effects in the update method as this works faster than the onGUI class
 		switch (draw_mode) {
 		case 0:
 			if (Input.GetMouseButtonDown (0)) {
-				if (!buttonRect2.Contains (muis)) {
+				if (noButton) {
 					StartCoroutine (_WaitForDepth (Input.mousePosition));
 				}
 			}
-			if (Input.GetMouseButtonUp (0)) {
-				// do nothing
-			}
-			if (Input.GetMouseButton (0)) {
-				// do nothing
-			}
+//			if (Input.GetMouseButtonUp (0)) {
+//				// do nothing
+//			}
+//			if (Input.GetMouseButton (0)) {
+//				// do nothing
+//			}
 			break;
 		case 1:
 			if (Input.GetMouseButtonDown (0)) {
-				if (!buttonRect2.Contains (muis)) {
-					
+				if (noButton) {
 					StartCoroutine (_WaitForDepthCircle (Input.mousePosition));
 				}
 				break;
 			}
-			if (Input.GetMouseButtonUp (0)) {
-				
-			}
-			if (Input.GetMouseButton (0)) {
-			}
+//			if (Input.GetMouseButtonUp (0)) {
+//			}
+//			if (Input.GetMouseButton (0)) {
+//			}
 			break;
 		case 2:
 			if (Input.GetMouseButtonDown (0)) {
-				m_help.tmpLine.Clear ();
-
-				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+				if (noButton) {
+					m_help.tmpLine.Clear ();
+					StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+				}
 			}
 			if (Input.GetMouseButtonUp (0)) {
-				if (!buttonRect2.Contains (muis)) {
+				if (noButton) {
 					m_help.newLineRenderer ();
-					m_help.placeNumber (m_help.FreeDrawText, m_help.sum, new Quaternion (0, 0, 0, 1));
-
 				}
-
-				
 			}
 			if (Input.GetMouseButton (0)) {
-				StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+				if (noButton) {
+					StartCoroutine (_WaitForDepthFreeDraw (Input.mousePosition));
+				}
 			}
-
 			break;
-
-
 		}
 		if (Input.GetKey (KeyCode.Escape)) {
 			// This is a fix for a lifecycle issue where calling
@@ -224,12 +210,12 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			} else {
 				grid = 0;
 			}
-			text = m_help.sum.ToString();
+			text = m_help.sum.ToString ();
 			GUI.Label (new Rect (300.0f,
-					45.0f,
-					500.0f,
-					200.0f),
-					"<size=25>" + text + "</size>");
+				45.0f,
+				500.0f,
+				200.0f),
+				"<size=25>" + text + "</size>");
 			switch (draw_mode) {
 			case 0:
 				#pragma warning disable 618
@@ -252,17 +238,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 					m_help.newScreenCap ();
 					break;
 				}
-//					if (Input.GetMouseButtonDown (0)) {
-//						StartCoroutine (_WaitForDepth (Input.mousePosition));
-//						break;
-//					}
-//					if (Input.GetMouseButtonUp (0)) {
-//						// do nothing
-//					}
-//					if (Input.GetMouseButton (0)) {
-//						// do nothing
-//					}
-						
 				
 				#pragma warning restore 618
 				break;
@@ -406,6 +381,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		}
 
 		GameObject tmp = Instantiate (m_prefabMarker, planeCenter, Quaternion.LookRotation (forward, up));
+		tmp.transform.localScale= new Vector3 (0.01f, 0.01f, 0.01f);
 		TextMesh markerText = (TextMesh)Instantiate (m_help.Text3D);
 
 		//place number next to it

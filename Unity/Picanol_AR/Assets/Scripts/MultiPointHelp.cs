@@ -45,7 +45,7 @@ public class MultiPointHelp : MonoBehaviour
 	/// Amount of invisble markers to place ==> higher is preciser yet heavier? ==> BENCHMARK!
 	/// </summary>
 	private const int GRID_SIZE = 144;
-//	private bool ScreenshotReady;
+	//	private bool ScreenshotReady;
 	public Texture2D Screenshot;
 	private Vector3[] positionsOfPoints;
 	public bool shot_taken;
@@ -75,11 +75,8 @@ public class MultiPointHelp : MonoBehaviour
 		tempPoints = new GameObject[GRID_SIZE];
 		points = new Vector3[GRID_SIZE];
 		DotMarkerInvisible = new GameObject[GRID_SIZE];
-//		ScreenshotReady = false;
-		m_lineRendererList[LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
-		FreeDrawText = (TextMesh)Instantiate (Text3D);
-			//FindObjectOfType<LineRenderer> ();
-		m_lineRendererList[LineRendererIndex].enabled = false;
+		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		m_lineRendererList [LineRendererIndex].enabled = false;
 		tmpLine = new List<Vector3> ();
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
 		new_circle = true;
@@ -90,17 +87,6 @@ public class MultiPointHelp : MonoBehaviour
 	void Update ()
 	{
 		
-	}
-
-	/// <summary>
-	/// Places the markerdots.
-	/// </summary>
-	public GameObject showDots (GameObject marker, string strmarker, Vector3 MarkerPlace, int m_i)
-	{
-		tempPoints [m_i] = (GameObject)Instantiate (marker);
-		tempPoints [m_i].transform.position = MarkerPlace;
-		tempPoints [m_i].tag = strmarker;
-		return tempPoints [m_i];
 	}
 
 	/// <summary>
@@ -171,42 +157,45 @@ public class MultiPointHelp : MonoBehaviour
 		return bestIndex;
 	}
 
+	public void UpdateRectangle ()
+	{
+		//enable linerenderer
+		m_lineRendererList [LineRendererIndex].enabled = true;
+		GameObject[] DotList = GameObject.FindGameObjectsWithTag ("marker");
+		foreach (GameObject t in DotList) {
+			tmpLine.Add (t.transform.position);
+		}
+		tmpLine.Add (DotList [0].transform.position);
+		positionsOfPoints = tmpLine.ToArray ();
+		m_lineRendererList [LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
+		m_lineRendererList [LineRendererIndex].SetPositions (positionsOfPoints);
+	}
+
+	public GameObject enableDot (int pointIndex)
+	{
+		Vector3 pos = new Vector3 ();
+		if (shot_taken) {
+			pos = DotMarkerInvisible [pointIndex].transform.position;
+		} else {
+			pos = m_pointCloud.m_points [pointIndex];
+		}
+		GameObject test = (GameObject)Instantiate (DotMarker);
+		test.transform.position = pos;
+		test.tag = "marker";
+		return test;
+	}
 
 	/// <summary>
-	/// Clears the Marker dots & the line renderer.
+	/// Places the markerdots.
 	/// </summary>
-	public bool ClearPoints (string[] type)
+	public GameObject showDots (GameObject marker, string strmarker, Vector3 MarkerPlace, int m_i)
 	{
-		tmpLine.Clear ();
-		foreach (LineRenderer lr in m_lineRendererList) {
-			LineRenderer.Destroy(lr);
-		}
-		LineRendererIndex = 0;
-		m_lineRendererList[LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
-		m_lineRendererList[LineRendererIndex].enabled = false;
-		m_i = 0;
-		// remove all game objects based on marker tag
-		foreach (string t in type){
-			GameObject[] enemies = GameObject.FindGameObjectsWithTag (t);
-			foreach (GameObject enemy in enemies) {
-				GameObject.Destroy (enemy);
-			}
-		}
-
-//		GameObject[] enemies = GameObject.FindGameObjectsWithTag ("marker");
-//		foreach (GameObject enemy in enemies) {
-//			GameObject.Destroy (enemy);
-//		}
-//		if (all) {
-//			enemies = GameObject.FindGameObjectsWithTag ("marker_invisible");
-//			foreach (GameObject enemy in enemies) {
-//				GameObject.Destroy (enemy);
-//			}
-//		}
-		//clear points array (CORRECT WAY?)
-		tempPoints = new GameObject[GRID_SIZE];
-		return true;
+		tempPoints [m_i] = (GameObject)Instantiate (marker);
+		tempPoints [m_i].transform.position = MarkerPlace;
+		tempPoints [m_i].tag = strmarker;
+		return tempPoints [m_i];
 	}
+
 
 	public void screenCap ()
 	{			
@@ -219,13 +208,7 @@ public class MultiPointHelp : MonoBehaviour
 		}	
 		shot_taken = !shot_taken;
 	}
-	public void newLineRenderer(){
 
-		LineRendererIndex++;
-		m_lineRendererList[LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
-		FreeDrawText = (TextMesh)Instantiate (Text3D);
-		m_lineRendererList[LineRendererIndex].enabled = false;
-		}
 	public void newScreenCap ()
 	{
 		if (System.IO.File.Exists (Path_Name)) {
@@ -243,63 +226,74 @@ public class MultiPointHelp : MonoBehaviour
 //		Destroy(screenShot2);
 //		System.IO.File.WriteAllBytes (Path_Name, bytes);
 	}
-	 
+
 
 	/// <summary>
 	/// Enables the dots which are being approx tapped .
 	/// </summary>
 	/// <returns>The dots.</returns>
-	public GameObject enableDot (int pointIndex)
+
+
+	public void newLineRenderer ()
 	{
-		Vector3 pos = new Vector3 ();
-		if (shot_taken) {
-			pos = DotMarkerInvisible [pointIndex].transform.position;
-		} else {
-			pos = m_pointCloud.m_points [pointIndex];
-		}
-		GameObject test = (GameObject)Instantiate (DotMarker);
-		test.transform.position = pos;
-		test.tag = "marker";
-		return test;
+		LineRendererIndex++;
+		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		FreeDrawText = (TextMesh)Instantiate (Text3D);
+		m_lineRendererList [LineRendererIndex].enabled = false;
 	}
 
 	public void UpdateFreeDraw (Vector3 lastPoint)
 	{
 
 		//enable linerenderer
-		m_lineRendererList[LineRendererIndex].enabled = true;
+		m_lineRendererList [LineRendererIndex].enabled = true;
 		tmpLine.Add (lastPoint);
 		positionsOfPoints = tmpLine.ToArray ();
-		m_lineRendererList[LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
-		m_lineRendererList[LineRendererIndex].SetPositions (positionsOfPoints);
-		sum=new Vector3(0,0,0);
+		m_lineRendererList [LineRendererIndex].numPositions = positionsOfPoints.Length; 
+		m_lineRendererList [LineRendererIndex].SetPositions (positionsOfPoints);
+
+		//we calculate the center of the points of the linerenderer and place our Number
+		sum = new Vector3 (0, 0, 0);
 		foreach (Vector3 tmp in positionsOfPoints) {
 			sum += tmp;
-
 		}
 		sum = sum / positionsOfPoints.Length;
 		placeNumber (FreeDrawText, sum, new Quaternion (0, 0, 0, 1));
 	}
 
-	public void UpdateRectangle ()
-	{
-		//enable linerenderer
-		m_lineRendererList[LineRendererIndex].enabled = true;
-		GameObject[] DotList = GameObject.FindGameObjectsWithTag ("marker");
-		foreach (GameObject t in DotList) {
-			tmpLine.Add (t.transform.position);
-		}
-		tmpLine.Add (DotList [0].transform.position);
-		positionsOfPoints = tmpLine.ToArray ();
-		m_lineRendererList[LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
-		m_lineRendererList[LineRendererIndex].SetPositions (positionsOfPoints);
-	}
-	public void placeNumber(TextMesh tmp, Vector3 numberpoint, Quaternion orientation)
+
+
+	public void placeNumber (TextMesh tmp, Vector3 numberpoint, Quaternion orientation)
 	{
 		tmp.text = LineRendererIndex.ToString ();
 		tmp.transform.position = numberpoint;
 		tmp.transform.localRotation = orientation;
-		tmp.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+		tmp.transform.localScale = new Vector3 (0.1f, 0.1f, 0.1f);
 		tmp.tag = "marker";
+	}
+
+
+	/// <summary>
+	/// Clears the Marker dots & the line renderer.
+	/// </summary>
+	public bool ClearPoints (string[] type)
+	{
+		tmpLine.Clear ();
+		foreach (LineRenderer lr in m_lineRendererList) {
+			LineRenderer.Destroy (lr);
+		}
+		LineRendererIndex = 0;
+		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		m_lineRendererList [LineRendererIndex].enabled = false;
+		m_i = 0;
+		// remove all game objects based on marker tag
+		foreach (string t in type) {
+			GameObject[] enemies = GameObject.FindGameObjectsWithTag (t);
+			foreach (GameObject enemy in enemies) {
+				GameObject.Destroy (enemy);
+			}
+		}
+		tempPoints = new GameObject[GRID_SIZE];
+		return true;
 	}
 }
