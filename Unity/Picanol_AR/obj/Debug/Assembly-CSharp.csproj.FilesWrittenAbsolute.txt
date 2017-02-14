@@ -21,3 +21,8 @@
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Unity.CecilTools.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Mono.Cecil.Pdb.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Mono.Cecil.Mdb.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Byn.Common.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/WebSocketSharpUnityMod.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Byn.Net.Websocket.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/WebRtcCSharp.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Byn.Net.Native.dll

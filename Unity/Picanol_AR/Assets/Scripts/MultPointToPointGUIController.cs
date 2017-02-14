@@ -78,6 +78,15 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	public Texture2D clearButton;
 	private Int16 grid;
 	public Int16 draw_mode;
+	/// <summary>
+	/// Debug console to be able to see the unity log on every platform
+	/// </summary>
+	public bool uDebugConsole = false;
+	/// <summary>
+	/// Output message list to show incoming and sent messages + output messages of the
+	/// system itself.
+	/// </summary>
+	public MessageList uOutput;
 
 	/// <summary>
 	/// The marker prefab to place on taps.
@@ -118,6 +127,11 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		// keep track of positions of screen to place markers if necessary (rectangle option)
 		m_help.GridCalculations ();
 		draw_mode = 0;
+
+		//shows the console on all platforms. for debugging only
+		if(uDebugConsole)
+			DebugHelper.ActivateConsole();
+		Append ("debug text test");
 	}
 
 	/// <summary>
@@ -210,12 +224,12 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 			} else {
 				grid = 0;
 			}
-			text = m_help.sum.ToString ();
-			GUI.Label (new Rect (300.0f,
-				45.0f,
-				500.0f,
-				200.0f),
-				"<size=25>" + text + "</size>");
+//			text = m_help.sum.ToString ();
+//			GUI.Label (new Rect (300.0f,
+//				45.0f,
+//				500.0f,
+//				200.0f),
+//				"<size=25>" + text + "</size>");
 			switch (draw_mode) {
 			case 0:
 				#pragma warning disable 618
@@ -418,10 +432,10 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		//With screenoverlay
 		if (m_help.shot_taken) {
 			//we take the smallest distance between points, to have no overlap when searching for the correct point in the invisible grid.
-			//		if (Screen.height > Screen.width)
-			//			distance = (int)Screen.width / 8 - margin;
-			//		else
-			//			distance = (int)Screen.height / 8 - margin;
+					if (Screen.height > Screen.width)
+						distance = (int)Screen.width / 8 - margin;
+					else
+						distance = (int)Screen.height / 8 - margin;
 			pointIndex = m_help.FindClosestPointGrid (touchPosition, distance);
 		} else {
 			Camera cam = Camera.main;
@@ -438,7 +452,15 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		}
 	}
 
-
+	/// <summary>
+	/// Adds a new message to the message view
+	/// </summary>
+	/// <param name="text"></param>
+	private void Append(string text)
+	{
+		Debug.Log("chat: " + text);
+		uOutput.AddTextEntry(text);
+	}
 }
 
 

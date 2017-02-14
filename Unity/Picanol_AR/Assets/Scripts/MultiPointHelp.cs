@@ -95,7 +95,6 @@ public class MultiPointHelp : MonoBehaviour
 	/// </summary>
 	public void FillGrid (GameObject[] Fill)
 	{
-		
 		Camera cam = Camera.main;
 		//place 1 marker in center of screen
 		//
