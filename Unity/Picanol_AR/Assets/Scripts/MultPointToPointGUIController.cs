@@ -25,6 +25,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Threading;
 
+
 /// <summary>
 /// GUI controller to show distance data.
 /// </summary>
@@ -45,6 +46,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// The scene's Tango application.
 	/// </summary>
 	private TangoApplication m_tangoApplication;
+
+	private webRTC wRTC;
 
 	/// <summary>
 	/// helper functions for multipoint
@@ -103,6 +106,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		m_help.shot_taken = false;
 		m_help.Screen_Shot_File_Name = "test.png";
 
+		wRTC = new webRTC ();
 		// If screenshot previously existed, remove it
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, m_help.Screen_Shot_File_Name);
 		if (System.IO.File.Exists (Path_Name)) {
@@ -132,6 +136,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		if(uDebugConsole)
 			DebugHelper.ActivateConsole();
 		Append ("debug text test");
+
+		wRTC.setup_webRTC ();
 	}
 
 	/// <summary>
@@ -215,6 +221,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	public void OnGUI ()
 	{
+		DebugHelper2.DrawConsole();
 		//text = "Pic not taken yet";
 		if (m_tangoApplication.HasRequestedPermissions ()) {
 			GUI.color = Color.white;
@@ -461,6 +468,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		Debug.Log("chat: " + text);
 		uOutput.AddTextEntry(text);
 	}
+
+
 }
 
 

@@ -48,9 +48,11 @@
   <ItemGroup>
      <Compile Include="Assets\Google-Unity\Scripts\AndroidHelper.cs" />
      <Compile Include="Assets\Google-Unity\Scripts\AndroidLifecycle.cs" />
+     <Compile Include="Assets\Scripts\DebugHelper2.cs" />
      <Compile Include="Assets\Scripts\MultPointToPointGUIController.cs" />
      <Compile Include="Assets\Scripts\MultPointToPointGUIController_backup.cs" />
      <Compile Include="Assets\Scripts\MultiPointHelp.cs" />
+     <Compile Include="Assets\Scripts\webRTC.cs" />
      <Compile Include="Assets\TangoPrefabs\Scripts\ARCameraPostProcess.cs" />
      <Compile Include="Assets\TangoPrefabs\Scripts\TangoARPoseController.cs" />
      <Compile Include="Assets\TangoPrefabs\Scripts\TangoARScreen.cs" />
@@ -134,8 +136,8 @@
      <Compile Include="Assets\TangoSDK\TangoUX\Scripts\Interfaces\ITangoUX.cs" />
      <Compile Include="Assets\TangoSDK\TangoUX\Scripts\Listeners\UxExceptionEventListener.cs" />
      <Compile Include="Assets\TangoSDK\TangoUX\Scripts\TangoUx.cs" />
-     <Compile Include="Assets\WebRtcNetwork\example\ChatApp.cs" />
      <Compile Include="Assets\WebRtcNetwork\example\DebugHelper.cs" />
+     <Compile Include="Assets\WebRtcNetwork\example\DebugScreen.cs" />
      <Compile Include="Assets\WebRtcNetwork\example\MessageList.cs" />
      <Compile Include="Assets\WebRtcNetwork\scripts\BrowserWebRtcNetwork.cs" />
      <Compile Include="Assets\WebRtcNetwork\scripts\BrowserWebRtcNetworkFactory.cs" />
