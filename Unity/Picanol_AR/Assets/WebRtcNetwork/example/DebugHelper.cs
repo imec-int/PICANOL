@@ -63,7 +63,7 @@ public class DebugHelper
 
         if (sShowConsole == false)
         {
-            if (GUI.Button(new Rect(Screen.width - 40, Screen.height - 20, 40, 20), "Show"))
+            if (GUI.Button(new Rect(Screen.width - 200, Screen.height - 100, 200, 100), "Show"))
             {
                 sShowConsole = true;
             }

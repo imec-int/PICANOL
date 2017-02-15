@@ -136,7 +136,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		if(uDebugConsole)
 			DebugHelper.ActivateConsole();
 		Append ("debug text test");
-
+		//Set the webconnection
 		wRTC.setup_webRTC ();
 	}
 
@@ -221,7 +221,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 	/// </summary>
 	public void OnGUI ()
 	{
-		DebugHelper2.DrawConsole();
+		DebugHelper.DrawConsole();
 		//text = "Pic not taken yet";
 		if (m_tangoApplication.HasRequestedPermissions ()) {
 			GUI.color = Color.white;
