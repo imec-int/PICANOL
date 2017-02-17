@@ -98,6 +98,8 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 
 	public void Start ()
 	{
+		// Make sure the android phone doesn't go to sleepmode ==> bad for connection
+		Screen.sleepTimeout = SleepTimeout.NeverSleep;
 		GUI.color = Color.black;
 		m_tangoApplication = FindObjectOfType<TangoApplication> ();
 		m_tangoApplication.Register (this);
@@ -135,7 +137,7 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 		//shows the console on all platforms. for debugging only
 		if(uDebugConsole)
 			DebugHelper.ActivateConsole();
-		Append ("debug text test");
+		wRTC.Append ("debug text test");
 		//Set the webconnection
 		wRTC.setup_webRTC ();
 	}
@@ -457,16 +459,6 @@ public class MultPointToPointGUIController : MonoBehaviour, ITangoDepth
 				m_help.m_i++;
 			}
 		}
-	}
-
-	/// <summary>
-	/// Adds a new message to the message view
-	/// </summary>
-	/// <param name="text"></param>
-	private void Append(string text)
-	{
-		Debug.Log("chat: " + text);
-		uOutput.AddTextEntry(text);
 	}
 
 

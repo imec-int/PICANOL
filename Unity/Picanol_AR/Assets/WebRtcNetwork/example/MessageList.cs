@@ -63,7 +63,7 @@ public class MessageList : MonoBehaviour
         GameObject ngp = Instantiate(uEntryPrefab);
         Text t = ngp.GetComponentInChildren<Text>();
         t.text = text;
-
+		Debug.Log ("addtext entry: " + text);
         RectTransform transform = ngp.GetComponent<RectTransform>();
         transform.SetParent(mOwnTransform, false);
 

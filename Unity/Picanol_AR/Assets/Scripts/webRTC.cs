@@ -78,6 +78,7 @@ public class webRTC : MonoBehaviour
 
 	private const int MAX_CODE_LENGTH = 256;
 
+	private WebCamTexture _webTex; 
 	void Start ()
 	{
 	}
@@ -93,6 +94,10 @@ public class webRTC : MonoBehaviour
 		WebRtcNetworkFactory factory = WebRtcNetworkFactory.Instance;
 		if (factory != null)
 			Append ("WebRtcNetworkFactory created");
+		uOutput = FindObjectOfType<MessageList>();
+		_webTex = new WebCamTexture();
+		_webTex.Play();
+		GetComponent<Renderer>().material.mainTexture = _webTex;
 	}
 
 	private void Setup ()
@@ -282,6 +287,7 @@ public class webRTC : MonoBehaviour
 
 	private void HandleIncommingMessage(ref NetworkEvent evt)
 	{
+		
 		MessageDataBuffer buffer = (MessageDataBuffer)evt.MessageData;
 
 		string msg = Encoding.UTF8.GetString(buffer.Buffer, 0, buffer.ContentLength);
@@ -316,10 +322,10 @@ public class webRTC : MonoBehaviour
 	/// Adds a new message to the message view
 	/// </summary>
 	/// <param name="text"></param>
-	private void Append(string text)
+	public void Append(string text)
 	{
 		Debug.Log("chat: " + text);
-		//uOutput.AddTextEntry(text);
+		uOutput.AddTextEntry(text);
 	}
 
 

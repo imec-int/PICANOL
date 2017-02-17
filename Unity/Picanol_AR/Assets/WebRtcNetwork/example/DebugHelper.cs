@@ -83,6 +83,7 @@ public class DebugHelper
 
             textStyle.normal.textColor = Color.white;
             textStyle.richText = true;
+			textStyle.fontSize = 20;
 
             GUI.Box(new Rect(0, Screen.height * 0.75f, Screen.width, Screen.height * 0.25f), "");
             GUILayout.BeginArea(new Rect(0, Screen.height * 0.75f, Screen.width, Screen.height * 0.25f));

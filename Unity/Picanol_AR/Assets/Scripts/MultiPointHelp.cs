@@ -65,6 +65,12 @@ public class MultiPointHelp : MonoBehaviour
 	/// The scene's Tango application.
 	/// </summary>
 	private TangoApplication m_tangoApplication;
+
+	/// <summary>
+	/// Output message list to show incoming and sent messages + output messages of the
+	/// system itself.
+	/// </summary>
+	public MessageList uOutput;
 	// Use this for initialization
 	void Start ()
 	{
