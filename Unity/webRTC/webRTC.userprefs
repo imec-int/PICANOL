@@ -1,0 +1,17 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/WebRtcVideoChat/scripts/native/UnityVideoCapturer.cs">
+    <Files>
+      <File FileName="Assets/WebRtcNetwork/scripts/BrowserWebRtcNetwork.cs" Line="18" Column="16" />
+      <File FileName="Assets/WebRtcVideoChat/example/CallApp.cs" Line="184" Column="1" />
+      <File FileName="Assets/WebRtcNetwork/scripts/WebRtcNetworkFactory.cs" Line="163" Column="18" />
+      <File FileName="Assets/WebRtcVideoChat/scripts/native/UnityVideoCapturer.cs" Line="62" Column="28" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/webRTC/Assets/WebRtcVideoChat/example/CallApp.cs" line="491" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

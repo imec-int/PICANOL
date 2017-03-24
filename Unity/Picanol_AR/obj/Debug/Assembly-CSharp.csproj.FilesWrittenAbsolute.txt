@@ -26,3 +26,5 @@
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Byn.Net.Websocket.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/WebRtcCSharp.dll
 /Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Byn.Net.Native.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Byn.Media.dll
+/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Temp/bin/Debug/Byn.Media.Native.dll

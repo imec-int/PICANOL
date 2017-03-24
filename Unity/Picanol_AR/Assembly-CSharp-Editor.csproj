@@ -56,6 +56,7 @@
      <Compile Include="Assets\TangoSDK\Editor\TangoMenu.cs" />
      <Compile Include="Assets\TangoSDK\Editor\TangoSDKAbout.cs" />
      <Compile Include="Assets\TangoSDK\Examples\Common\Scripts\Editor\TangoDynamicMeshInspector.cs" />
+     <None Include="Assets\WebRtcVideoChat\readme.txt" />
      <None Include="Assets\TangoSDK\Examples\ExperimentalMeshOcclusion\Shaders\ZTestBlur.shader" />
      <None Include="Assets\TangoPrefabs\Shaders\TangoEnvironmentalLighting\EnvironmentalLightingStandard.shader" />
      <None Include="Assets\TangoPrefabs\Shaders\PointCloud.shader" />
@@ -64,10 +65,13 @@
      <None Include="Assets\WebRtcNetwork\Plugins\android\AndroidManifest.xml" />
      <None Include="Assets\TangoSDK\Core\Shaders\RGB2YUV_CbCr.shader" />
      <None Include="Assets\WebRtcNetwork\Plugins\Byn.Common.xml" />
+     <None Include="Assets\WebRtcVideoChat\Resources\webrtcvideochatplugin.txt" />
      <None Include="Assets\TangoPrefabs\Shaders\ARPostProcess.shader" />
+     <None Include="Assets\WebRtcVideoChat\license.txt" />
      <None Include="Assets\TangoSDK\Examples\ExperimentalMeshBuilderWithPhysics\Shader\UnlitColor.shader" />
      <None Include="Assets\TangoPrefabs\Shaders\TangoEnvironmentalLighting\EnvironmentalLightingSpecularBumped.shader" />
      <None Include="Assets\TangoPrefabs\Shaders\TangoEnvironmentalLighting\TangoEnvironmentalLighting.cginc" />
+     <None Include="Assets\WebRtcVideoChat\Plugins\Byn.Media.xml" />
      <None Include="Assets\TangoSDK\Core\Shaders\DepthEmulation.shader" />
      <None Include="Assets\TangoSDK\Core\Shaders\RGB2YUV_Y.shader" />
      <None Include="Assets\WebRtcNetwork\Resources\webrtcnetworkplugin.txt" />
@@ -83,6 +87,7 @@
      <None Include="Assets\WebRtcNetwork\Plugins\android\readme.txt" />
      <None Include="Assets\Plugins\Android\AndroidManifest.xml" />
      <None Include="Assets\WebRtcNetwork\LICENSE_WEBRTC.txt" />
+     <None Include="Assets\WebRtcVideoChat\changelog.txt" />
      <None Include="Assets\TangoPrefabs\Shaders\TangoEnvironmentalLighting\EnvironmentalLightingDiffuse.shader" />
  <Reference Include="UnityEngine.Analytics">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
@@ -158,6 +163,12 @@
  </Reference>
  <Reference Include="UnityEditor.OSXStandalone.Extensions">
  <HintPath>/Applications/Unity/Unity.app/Contents/PlaybackEngines/macstandalonesupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
+ </Reference>
+ <Reference Include="Byn.Media">
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcVideoChat/Plugins/Byn.Media.dll</HintPath>
+ </Reference>
+ <Reference Include="Byn.Media.Native">
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcVideoChat/Plugins/Byn.Media.Native.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>

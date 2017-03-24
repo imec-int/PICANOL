@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 090516728dd9a4f8d8f4649c6b1aa115
+timeCreated: 1486566188
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - DotMarker: {fileID: 1491317525922162, guid: 6b56a4a94dad84132b7c070d1fb7e9e2,
+      type: 2}
+  - DotMarker2: {fileID: 1653376543276366, guid: 3463f2e5defc0403e96593750bc4b5bf,
+      type: 2}
+  - m_lineRenderer: {fileID: 120744089294875700, guid: 84f5eec09c48e402f9add5a6c990e0dd,
+      type: 2}
+  - m_pointCloud: {fileID: 11493252, guid: 5f59b9945461344cebfcccf17cdc53f9, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

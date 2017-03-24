@@ -1,0 +1,28 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Prefabs/MultPointToPointGUIController.cs">
+    <Files>
+      <File FileName="Assets/TangoSDK/Examples/AreaDescriptionManagement/Scripts/ADMGUIController.cs" Line="1" Column="1" />
+      <File FileName="Assets/Prefabs/MultPointToPointGUIController.cs" Line="392" Column="4" />
+      <File FileName="Assets/WebRtcVideoChat/example/CallApp.cs" Line="1" Column="1" />
+      <File FileName="Assets/WebRtcVideoChat/scripts/native/UnityVideoCapturer.cs" Line="1" Column="1" />
+      <File FileName="Assets/TangoSDK/Core/Scripts/TangoWrappers/TangoApplication.cs" Line="1" Column="1" />
+      <File FileName="Assets/TangoPrefabs/Scripts/TangoARScreen.cs" Line="67" Column="9" />
+      <File FileName="Assets/TangoSDK/Core/Scripts/TangoWrappers/VideoOverlayProvider.cs" Line="1" Column="1" />
+      <File FileName="Assets/WebRtcVideoChat/scripts/UnityCallFactory.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/WebRtcNetwork/example/ChatApp.cs" line="421" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/WebRtcNetwork/example/ChatApp.cs" line="394" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/example/CallApp.cs" line="199" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/example/CallApp.cs" line="203" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/example/CallApp.cs" line="285" column="74" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/example/CallApp.cs" line="284" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/example/CallApp.cs" line="227" column="17" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/VideoChat/Assets/WebRtcVideoChat/example/CallApp.cs" line="229" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
