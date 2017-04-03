@@ -508,7 +508,7 @@ public class ARGUIController : MonoBehaviour, ITangoLifecycle, ITangoDepth
         {
             return;
         }
-    }
+	}
 
     /// <summary>
     /// Wait for the next depth update, then find the plane at the touch position.

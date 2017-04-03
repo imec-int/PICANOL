@@ -316,6 +316,7 @@ public class TangoARScreen : MonoBehaviour, ITangoLifecycle, ITangoCameraTexture
         // returns 2 if device default orientation is landscape. Adding device default orientation with
         // how much the display is rotation from default orientation will get us the result of current display
         // orientation. (landscape vs. portrait)
+		Debug.Log("debugU: device orientation: "+AndroidHelper.GetDefaultOrientation().ToString()+" AR screen orientation: "+displayRotation.ToString());
         bool isLandscape = (AndroidHelper.GetDefaultOrientation() + (int)displayRotation) % 2 == 0;
 
 #if !UNITY_EDITOR
@@ -337,7 +338,7 @@ public class TangoARScreen : MonoBehaviour, ITangoLifecycle, ITangoCameraTexture
 
         TangoCameraIntrinsics alignedIntrinsics = new TangoCameraIntrinsics();
         TangoCameraIntrinsics intrinsics = new TangoCameraIntrinsics();
-        VideoOverlayProvider.GetDeviceOientationAlignedIntrinsics(TangoEnums.TangoCameraId.TANGO_CAMERA_COLOR,
+        VideoOverlayProvider.GetDeviceOrientationAlignedIntrinsics(TangoEnums.TangoCameraId.TANGO_CAMERA_COLOR,
                                                                   alignedIntrinsics);
         VideoOverlayProvider.GetIntrinsics(TangoEnums.TangoCameraId.TANGO_CAMERA_COLOR,
                                            intrinsics);

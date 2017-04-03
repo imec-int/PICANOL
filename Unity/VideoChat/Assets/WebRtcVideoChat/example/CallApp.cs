@@ -14,7 +14,7 @@ using Byn.Media;
 using Byn.Media.Native;
 using System.IO;
 using Byn.Common;
-using Tango;
+//using Tango;
 
 /// <summary>
 /// This class + prefab is a complete app allowing to call another app using a shared text or password
@@ -67,19 +67,30 @@ public class CallApp : MonoBehaviour
 	/// Debug console to be able to see the unity log on every platform
 	/// </summary>
 	public bool uDebugConsole = false;
+	/*------Part for connection with other scripts*/
 	/// <summary>
 	/// Connection with AR camera?
 	/// </summary>
 	public Camera m_camera;
+	/// <summary>
+	/// Connection with Multipoint script
+	/// </summary>
+	public MultiPointToPointGUIController Mptp;
+	/// <summary>
+	/// The old draw mode, we only send an update when mode changes to keep draw mode synced over peers.
+	/// </summary>
+	private int old_draw_mode;
+
+	/*------------------------------------------------*/
 
 	#region UI
 
 
 	[Header ("Setup panel")]
 	/// <summary>
-    /// Panel with the join button. Will be hidden after setup
-    /// </summary>
-    public RectTransform uSetupPanel;
+	/// Panel with the join button. Will be hidden after setup
+	/// </summary>
+	public RectTransform uSetupPanel;
 
 	/// <summary>
 	/// Input field used to enter the room name.
@@ -114,9 +125,9 @@ public class CallApp : MonoBehaviour
 
 	[Header ("Chat panel elements")]
 	/// <summary>
-    /// Input field to enter a new message.
-    /// </summary>
-    public InputField uMessageInputField;
+	/// Input field to enter a new message.
+	/// </summary>
+	public InputField uMessageInputField;
 
 	/// <summary>
 	/// Output message list to show incoming and sent messages + output messages of the
@@ -138,9 +149,9 @@ public class CallApp : MonoBehaviour
 
 	[Header ("Video panel elements")]
 	/// <summary>
-    /// Image of the local camera
-    /// </summary>
-    public RawImage uLocalVideoImage;
+	/// Image of the local camera
+	/// </summary>
+	public RawImage uLocalVideoImage;
 
 	/// <summary>
 	/// Image of the remote camera
@@ -196,7 +207,7 @@ public class CallApp : MonoBehaviour
 
 	protected virtual void Start ()
 	{
-		Debug.Log ("Application Started: VideoChat ==> Debug ok?");
+		Debug.Log ("debugU: Application Started: VideoChat ==> Debug ok?");
 		if (uDebugConsole)
 			DebugHelper.ActivateConsole ();
 		if (uLog) {
@@ -206,22 +217,23 @@ public class CallApp : MonoBehaviour
 				SLog.L ("Log active");
 			}
 		}
+//		Append(Network.player.ipAddress);
 		setupDone = false;
 		//This can be used to get the native webrtc log but causes a huge slowdown
 		//only use if not webgl
 		bool nativeWebrtcLog = false;
 		if (nativeWebrtcLog) {
-#if UNITY_ANDROID
+			#if UNITY_ANDROID
 			//due to BUG0008 the callbacks in android doesn't work yet. use logcat instead of unity log
 			Byn.Net.Native.NativeWebRtcNetworkFactory.SetNativeDebugLog (WebRtcCSharp.LoggingSeverity.LS_INFO);
-#elif (!UNITY_WEBGL || UNITY_EDITOR)
+			#elif (!UNITY_WEBGL || UNITY_EDITOR)
 			caller = false;
 			Byn.Net.Native.NativeWebRtcNetworkFactory.LogNative (WebRtcCSharp.LoggingSeverity.LS_INFO);
-#else
+			#else
 			caller = false;
-            //webgl. logging isn't supported here and has to be done via the browser.
-            Debug.LogWarning("Platform doesn't support native webrtc logging.");
-#endif
+			//webgl. logging isn't supported here and has to be done via the browser.
+			Debug.LogWarning("Platform doesn't support native webrtc logging.");
+			#endif
 		}
 
 		#if UNITY_ANDROID
@@ -237,21 +249,21 @@ public class CallApp : MonoBehaviour
 		//use video and audio by default (the UI is toggled on by default as well it will change on click )
 		mMediaConfig.Audio = uAudioToggle.isOn;
 		mMediaConfig.Video = uVideoToggle.isOn;
-		
+
 		//keep the resolution low.
 		//This helps avoiding problems with very weak CPU's and very high resolution cameras
 		//(apparently a problem with win10 tablets)
 		mMediaConfig.MinWidth = 160;
 		mMediaConfig.MinHeight = 120;
-		mMediaConfig.MaxWidth = 1920;
-		mMediaConfig.MaxHeight = 1080;
+		mMediaConfig.MaxWidth = 1080;
+		mMediaConfig.MaxHeight = 1920;
 		mMediaConfig.IdealWidth = 320;
 		mMediaConfig.IdealHeight = 240;
-        
+
 		SetGuiState (true);
 
 
-		
+
 
 		//fill the video dropbox
 		UpdateVideoDropdown ();
@@ -299,20 +311,21 @@ public class CallApp : MonoBehaviour
 		}
 		Append ("Call created!");
 		mCall.CallEvent += Call_CallEvent;
-		//if (caller) {
-//			Camera cam = GameObject.FindGameObjectWithTag ("TangoCam").GetComponent<Camera> ();
-//			Append ("debugU: CallApp " + cam.name.ToString ());
-		mMediaConfig.VideoDeviceName = uVideoDropdown.options [2].text;
-		//	}	
+//		if (caller) {
+//			//		Camera cam = Camera.main;//GameObject.FindGameObjectWithTag ("TangoCam").GetComponent<Camera> ();
+//			//		Append ("debugU: CallApp " + cam.name.ToString ());
+//			mMediaConfig.VideoDeviceName = uVideoDropdown.options [4].text;
+//		}	
 
-		//			m_camera = GetComponent<Camera> ();cam.name.ToString ();/
-//			Debug.Log ("debugU: TangoCamera CallApp = " + 		m_camera.name.ToString ());
+
+		//			m_camera = GetComponent<Camera> ();
+		//			Debug.Log ("debugU: TangoCamera CallApp = " + 		m_camera.name.ToString ());
 
 		//Debug.Log ("debugU: New video device selected: " + mMediaConfig.VideoDeviceName.ToString ());
 		//Debug.Log ("debugU: mMediaConfig " + mCall.ToString ());
 		mCall.Configure (mMediaConfig);
 
-		
+
 		setupDone = true;
 		SetGuiState (false);
 	}
@@ -334,22 +347,22 @@ public class CallApp : MonoBehaviour
 	/// <param name="e"></param>
 	protected void Call_CallEvent (object sender, CallEventArgs e)
 	{
-		Debug.Log ("debugU: CallEvent = " + e.Type.ToString ());
+		//Debug.Log ("debugU: CallEvent = " + e.Type.ToString ());
 		switch (e.Type) {
 		case CallEventType.CallAccepted:
-                //Outgoing call was successful or an incoming call arrived
+			//Outgoing call was successful or an incoming call arrived
 			Append ("Connection established");
 			break;
 		case CallEventType.CallEnded:
-                //Call was ended / one of the users hung up -> reset the app
+			//Call was ended / one of the users hung up -> reset the app
 			Append ("Call ended");
 			Reset ();
 			break;
 		case CallEventType.ListeningFailed:
-                //listening for incoming connections failed
-                //this usually means a user is using the string / room name already to wait for incoming calls
-                //try to connect to this user
-                //(note might also mean the server is down or the name is invalid in which case call will fail as well)
+			//listening for incoming connections failed
+			//this usually means a user is using the string / room name already to wait for incoming calls
+			//try to connect to this user
+			//(note might also mean the server is down or the name is invalid in which case call will fail as well)
 			EnsureLength ();
 			mCall.Call (uRoomNameInputField.text);
 			break;
@@ -370,7 +383,7 @@ public class CallApp : MonoBehaviour
 			break;
 
 		case CallEventType.FrameUpdate:
-                //new frame received from webrtc (either from local camera or network)
+			//new frame received from webrtc (either from local camera or network)
 			//if (!caller)
 			UpdateFrame (e as FrameUpdateEventArgs);
 			break;
@@ -378,11 +391,25 @@ public class CallApp : MonoBehaviour
 			{
 				//text message received
 				MessageEventArgs args = e as MessageEventArgs;
-				if (args.Content.StartsWith ("x")) {
-					Append ("Remote Mouse received! " + args.Content);
+
+				switch (args.Content.Substring (0, Math.Min (3, e.ToString ().Length))) {
+				case "mou":
+					Append ("mouse received! " + args.Content);
 					mouse_update (args.Content);
-				} else
+					break;
+				case "dra":
+					Mptp.draw_mode = Convert.ToInt16 (args.Content.Substring (5));
+					old_draw_mode = Mptp.draw_mode;
+					Debug.Log ("New Draw mode:" + Mptp.draw_mode.ToString ());
+					break;
+				case "cle":
+					Mptp.m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					break;
+				default:
 					Append (args.Content);
+					break;
+				}
+
 				break;
 			}
 		case CallEventType.WaitForIncomingCall:
@@ -403,12 +430,11 @@ public class CallApp : MonoBehaviour
 	void mouse_update (string mouseLoc)
 	{
 		String[] mouseSplit = mouseLoc.Split ('y');
-			float x_coor = Convert.ToSingle(mouseSplit [0].Substring (2));
-			float y_coor = Convert.ToSingle(mouseSplit [1].Substring (2));
-		
-			Append ("x_coor =" + x_coor.ToString()+" y_coor ="+y_coor.ToString());
+		float x_coor = Convert.ToSingle (mouseSplit [0].Substring (8));
+		float y_coor = Convert.ToSingle (mouseSplit [1].Substring (1));
 
-
+		Append ("x_coor =" + x_coor.ToString () + " y_coor =" + y_coor.ToString ());
+		Mptp.RemoteUpdate (x_coor, y_coor);
 	}
 
 	/// <summary>
@@ -426,6 +452,7 @@ public class CallApp : MonoBehaviour
 			Texture2D.Destroy (tex);
 			tex = null;
 		}
+		Debug.Log ("received frame dimensions (h x w): " + frame.Height.ToString () + " x " + frame.Width.ToString ());
 		//no texture? create a new one first
 		if (tex == null) {
 			newTextureCreated = true;
@@ -450,25 +477,25 @@ public class CallApp : MonoBehaviour
 	protected virtual void UpdateLocalTexture (RawFrame frame)
 	{
 		//if(caller)VideoOverlayProvider.UpdateARScreen(TangoEnums.TangoCameraId.TANGO_CAMERA_COLOR);
-//		if (caller) 
+		//		if (caller) 
 		//else{
-//			if (uLocalVideoImage != null) {
-//				if (frame != null) {
-//					bool changed = UpdateTexture (ref mLocalVideoTexture, frame);
-//					uLocalVideoImage.texture = mLocalVideoTexture;
-//					if (uLocalVideoImage.gameObject.activeSelf == false) {
-//						uLocalVideoImage.gameObject.SetActive (true);
-//					}
-//					if (changed) {
-//						uLocalAspectRatio.aspectRatio = mLocalVideoTexture.width / (float)mLocalVideoTexture.height;
-//					}
-//				} else {
-//					uLocalVideoImage.texture = null;
-//					uLocalVideoImage.gameObject.SetActive (false);
-//				}
+		//			if (uLocalVideoImage != null) {
+		//				if (frame != null) {
+		//					bool changed = UpdateTexture (ref mLocalVideoTexture, frame);
+		//					uLocalVideoImage.texture = mLocalVideoTexture;
+		//					if (uLocalVideoImage.gameObject.activeSelf == false) {
+		//						uLocalVideoImage.gameObject.SetActive (true);
+		//					}
+		//					if (changed) {
+		//						uLocalAspectRatio.aspectRatio = mLocalVideoTexture.width / (float)mLocalVideoTexture.height;
+		//					}
+		//				} else {
+		//					uLocalVideoImage.texture = null;
+		//					uLocalVideoImage.gameObject.SetActive (false);
+		//				}
 		//	}
-//
-//		}
+		//
+		//		}
 	}
 
 	/// <summary>
@@ -477,11 +504,13 @@ public class CallApp : MonoBehaviour
 	/// <param name="frame"></param>
 	protected virtual void UpdateRemoteTexture (RawFrame frame)
 	{
-//		if (!caller) {
+		//		if (!caller) {
 		if (uRemoteVideoImage != null) {
 			if (frame != null) {
 				bool changed = UpdateTexture (ref mRemoteVideoTexture, frame);
 				uRemoteVideoImage.texture = mRemoteVideoTexture;
+			//TODO camera images entered rotated, fix this with camera intrinsics? 
+			uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 270f);
 				if (changed) {
 					uRemoteAspectRatio.aspectRatio = mRemoteVideoTexture.width / (float)mRemoteVideoTexture.height;
 				}
@@ -489,7 +518,7 @@ public class CallApp : MonoBehaviour
 				uRemoteVideoImage.texture = uNoCameraTexture;
 			}
 		}
-//		}
+		//		}
 	}
 
 	protected virtual void UpdateFrame (FrameUpdateEventArgs frameUpdateEventArgs)
@@ -498,11 +527,12 @@ public class CallApp : MonoBehaviour
 		//the bytes are in order R G B A
 		//Unity seem to use this byte order but also flips the image horizontally (reading the last row first?)
 		//this is reversed using UI to avoid wasting CPU time
-
-		if (frameUpdateEventArgs.IsRemote == false) {
-			UpdateLocalTexture (frameUpdateEventArgs.Frame);
-		} else {
-			UpdateRemoteTexture (frameUpdateEventArgs.Frame);
+		if (!Mptp.hold_image) {
+			if (frameUpdateEventArgs.IsRemote == false) {
+				UpdateLocalTexture (frameUpdateEventArgs.Frame);
+			} else {
+				UpdateRemoteTexture (frameUpdateEventArgs.Frame);
+			}
 		}
 	}
 
@@ -545,9 +575,7 @@ public class CallApp : MonoBehaviour
 		//GUILayout.EndArea();
 		//draws the debug console (or the show button in the corner to open it)
 		DebugHelper.DrawConsole ();
-		if (Input.GetMouseButtonDown (0) & setupDone) {
-			SendMsg ("x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
-		}
+
 	}
 
 	/// <summary>
@@ -586,7 +614,7 @@ public class CallApp : MonoBehaviour
 			uVideoDropdown.AddOptions (new List<string> (new string[] { "Default" }));
 			uVideoDropdown.interactable = false;
 		}
-		
+
 	}
 
 	public void VideoDropdownOnValueChanged (int index)
@@ -604,7 +632,7 @@ public class CallApp : MonoBehaviour
 	/// Adds a new message to the message view
 	/// </summary>
 	/// <param name="text"></param>
-	private void Append (string text)
+	public void Append (string text)
 	{
 		if (uMessageOutput != null) {
 			uMessageOutput.AddTextEntry (text);
@@ -651,8 +679,22 @@ public class CallApp : MonoBehaviour
 			mCall.Update ();
 
 		}
-	}
+		if (Input.GetMouseButtonUp (0) & setupDone & !Mptp.clearSignal) {
+			SendMsg ("mouse x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
+		}
 
+		if (Mptp.draw_mode != old_draw_mode) {
+			// If this entity changes its draw mode, we send message to other peer
+			SendMsg ("draw:" + Mptp.draw_mode);
+			old_draw_mode = Mptp.draw_mode;
+		}
+		if (Mptp.clearSignal) {
+			SendMsg ("clear");
+			Mptp.clearSignal = false;
+		}
+
+	}
+	
 	#region UI
 
 	/// <summary>
@@ -717,16 +759,33 @@ public class CallApp : MonoBehaviour
 	/// Sends a message to the other end
 	/// </summary>
 	/// <param name="msg"></param>
-	private void SendMsg (string msg)
+	public void SendMsg (string msg)
 	{
 		if (String.IsNullOrEmpty (msg)) {
 			//never send null or empty messages. webrtc can't deal with that
 			return;
 		}
-		if (msg.StartsWith ("New Mouse Pos")) {
+		switch (msg.Substring (0, Math.Min (3, msg.Length))) {
+		case "mou":
 			Debug.Log ("Remote Mouse received! " + msg);
-		} else
+			break;
+		case "dra":
+			Debug.Log (msg);
+			break;
+		case "cle":
+			Debug.Log ("Points cleared");
+			break;
+		default:
 			Append (msg);
+			break;
+		}
+
+
+		//		if (msg.StartsWith ("New Mouse Pos")) {
+		//			Debug.Log ("Remote Mouse received! " + msg);
+		//		} else
+		//	Append (msg);
+		//Debug.Log ("SendMsg gebeurd!");
 		mCall.Send (msg);
 
 		//reset UI

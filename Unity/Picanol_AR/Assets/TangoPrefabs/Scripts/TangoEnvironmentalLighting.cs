@@ -198,6 +198,7 @@ public class TangoEnvironmentalLighting : MonoBehaviour, ITangoVideoOverlay, ITa
     /// <param name="imageBuffer">Tango camera image buffer.</param>
     public void OnTangoImageAvailableEventHandler(TangoEnums.TangoCameraId cameraId, TangoUnityImageData imageBuffer)
     {
+		Debug.Log ("tango image available event");
         _ComputeDiffuseCoefficients(imageBuffer);
     }
     

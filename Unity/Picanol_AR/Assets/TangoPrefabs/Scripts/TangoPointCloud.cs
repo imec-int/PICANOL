@@ -379,7 +379,7 @@ public class TangoPointCloud : MonoBehaviour, ITangoPointCloud
         }
 
         TangoCameraIntrinsics alignedIntrinsics = new TangoCameraIntrinsics();
-        VideoOverlayProvider.GetDeviceOientationAlignedIntrinsics(TangoEnums.TangoCameraId.TANGO_CAMERA_COLOR,
+        VideoOverlayProvider.GetDeviceOrientationAlignedIntrinsics(TangoEnums.TangoCameraId.TANGO_CAMERA_COLOR,
                                                                   alignedIntrinsics);
         int returnValue = TangoSupport.FitPlaneModelNearClick(
                 m_points, m_pointsCount, m_depthTimestamp, alignedIntrinsics, ref colorCameraTUnityWorld,

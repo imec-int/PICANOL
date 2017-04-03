@@ -75,11 +75,14 @@ public class CallApp : MonoBehaviour
 	/// <summary>
 	/// Connection with Multipoint script
 	/// </summary>
-	public MultPointToPointGUIController Mptp;
+	public MultiPointToPointGUIController Mptp;
+
+
 	/// <summary>
 	/// The old draw mode, we only send an update when mode changes to keep draw mode synced over peers.
 	/// </summary>
 	private int old_draw_mode;
+
 	/*------------------------------------------------*/
 
 	#region UI
@@ -203,10 +206,12 @@ public class CallApp : MonoBehaviour
 	///
 	/// </summary>
 	private bool caller = false;
+	public bool MouseDown = true;
+	public static bool holdStill = false;
 
 	protected virtual void Start ()
 	{
-		Debug.Log ("Application Started: VideoChat ==> Debug ok?");
+//		Debug.Log ("debugU: Application Started: VideoChat ==> Debug ok?");
 		if (uDebugConsole)
 			DebugHelper.ActivateConsole ();
 		if (uLog) {
@@ -219,6 +224,7 @@ public class CallApp : MonoBehaviour
 		setupDone = false;
 		//This can be used to get the native webrtc log but causes a huge slowdown
 		//only use if not webgl
+		Append (Network.player.ipAddress);
 		bool nativeWebrtcLog = false;
 		if (nativeWebrtcLog) {
 #if UNITY_ANDROID
@@ -255,16 +261,16 @@ public class CallApp : MonoBehaviour
 		mMediaConfig.MinHeight = 120;
 		mMediaConfig.MaxWidth = 1920;
 		mMediaConfig.MaxHeight = 1080;
-		mMediaConfig.IdealWidth = 320;
-		mMediaConfig.IdealHeight = 240;
-        
+		mMediaConfig.IdealWidth = 1920;
+		mMediaConfig.IdealHeight = 1080;
 		SetGuiState (true);
 
 
-		
+
 
 		//fill the video dropbox
 		UpdateVideoDropdown ();
+		JoinButtonPressed ();
 	}
 
 
@@ -303,25 +309,25 @@ public class CallApp : MonoBehaviour
 		string[] devices = UnityCallFactory.Instance.GetVideoDevices ();
 		if (devices == null || devices.Length == 0) {
 			Debug.Log ("no device found or no device information available");
+			Append ("no device found or no device information available");
 		} else {
-			foreach (string s in devices)
+			foreach (string s in devices) {
 				Debug.Log ("device found: " + s);
+				Append ("device found: " + s);
+			}
 		}
-		Append ("Call created!");
+			Append ("Call created!");
 		mCall.CallEvent += Call_CallEvent;
-		//if (caller) {
-		Camera cam = Camera.main;//GameObject.FindGameObjectWithTag ("TangoCam").GetComponent<Camera> ();
-		Append ("debugU: CallApp " + cam.name.ToString ());
-		mMediaConfig.VideoDeviceName = cam.name.ToString ();//uVideoDropdown.options [2].text;
-		//	}	
 
-		//			m_camera = GetComponent<Camera> ();
-//			Debug.Log ("debugU: TangoCamera CallApp = " + 		m_camera.name.ToString ());
+		if (caller) {
+			//if (uVideoDropdown.options.Count == 4) {
+			mMediaConfig.VideoDeviceName = uVideoDropdown.options [4].text;
+			//}
+		}	
 
 		//Debug.Log ("debugU: New video device selected: " + mMediaConfig.VideoDeviceName.ToString ());
 		//Debug.Log ("debugU: mMediaConfig " + mCall.ToString ());
 		mCall.Configure (mMediaConfig);
-
 		
 		setupDone = true;
 		SetGuiState (false);
@@ -344,7 +350,7 @@ public class CallApp : MonoBehaviour
 	/// <param name="e"></param>
 	protected void Call_CallEvent (object sender, CallEventArgs e)
 	{
-		Debug.Log ("debugU: CallEvent = " + e.Type.ToString ());
+		
 		switch (e.Type) {
 		case CallEventType.CallAccepted:
                 //Outgoing call was successful or an incoming call arrived
@@ -388,22 +394,39 @@ public class CallApp : MonoBehaviour
 			{
 				//text message received
 				MessageEventArgs args = e as MessageEventArgs;
-				//TODO switch statement
-				if (args.Content.StartsWith ("x")) {
-					Append ("Remote Mouse received! " + args.Content);
+				switch (args.Content.Substring (0, Math.Min (3, e.ToString ().Length))) {
+				case "mou":
+					Append ("mouse received! " + args.Content);
 					mouse_update (args.Content);
-				} else {
-					if (args.Content.StartsWith ("draw:")) {
-						Mptp.draw_mode = Convert.ToInt16 (args.Content.Substring (5));
-						old_draw_mode = Mptp.draw_mode;
-						Debug.Log ("New Draw mode:" + Mptp.draw_mode.ToString ());
-					} else {
-						if (args.Content.StartsWith ("clear")) {
-							Mptp.m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
-						} else
-							Append (args.Content);
-					}
+					break;
+				case "dra":
+					Mptp.draw_mode = Convert.ToInt16 (args.Content.Substring (5));
+					old_draw_mode = Mptp.draw_mode;
+					Debug.Log ("New Draw mode:" + Mptp.draw_mode.ToString ());
+					break;
+				case "cle":
+					Mptp.m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
+					break;
+				case "Mou":
+					Debug.Log ("Mouse received" + e.ToString ());
+					if (args.Content.EndsWith ("up"))
+						Mptp.MouseUp = true;
+					else
+						Mptp.MouseUp = false;
+					break;
+				case "Hol":
+					Append (args.Content.ToString ());
+					if (args.Content.EndsWith ("alse"))
+						holdStill = false;
+					else
+						holdStill = true;
+					Debug.Log ("request to hold still?" + holdStill.ToString ());
+					break;
+				default:
+					Append (args.Content);
+					break;
 				}
+
 				break;
 			}
 		case CallEventType.WaitForIncomingCall:
@@ -424,10 +447,11 @@ public class CallApp : MonoBehaviour
 	void mouse_update (string mouseLoc)
 	{
 		String[] mouseSplit = mouseLoc.Split ('y');
-		float x_coor = Convert.ToSingle (mouseSplit [0].Substring (2));
+		float x_coor = Convert.ToSingle (mouseSplit [0].Substring (8));
 		float y_coor = Convert.ToSingle (mouseSplit [1].Substring (1));
 		
 		Append ("x_coor =" + x_coor.ToString () + " y_coor =" + y_coor.ToString ());
+
 		Mptp.RemoteUpdate (x_coor, y_coor);
 	}
 
@@ -455,6 +479,7 @@ public class CallApp : MonoBehaviour
 			} else {
 				tex = new Texture2D (frame.Width, frame.Height, TextureFormat.YUY2, false);
 			}
+
 			tex.wrapMode = TextureWrapMode.Clamp;
 		}
 		///copy image data into the texture and apply
@@ -462,6 +487,7 @@ public class CallApp : MonoBehaviour
 		tex.Apply ();
 		return newTextureCreated;
 	}
+
 
 	/// <summary>
 	/// Updates the local video. If the frame is null it will hide the video image
@@ -472,21 +498,24 @@ public class CallApp : MonoBehaviour
 		//if(caller)VideoOverlayProvider.UpdateARScreen(TangoEnums.TangoCameraId.TANGO_CAMERA_COLOR);
 //		if (caller) 
 		//else{
-//			if (uLocalVideoImage != null) {
-//				if (frame != null) {
-//					bool changed = UpdateTexture (ref mLocalVideoTexture, frame);
-//					uLocalVideoImage.texture = mLocalVideoTexture;
-//					if (uLocalVideoImage.gameObject.activeSelf == false) {
-//						uLocalVideoImage.gameObject.SetActive (true);
-//					}
-//					if (changed) {
-//						uLocalAspectRatio.aspectRatio = mLocalVideoTexture.width / (float)mLocalVideoTexture.height;
-//					}
-//				} else {
-//					uLocalVideoImage.texture = null;
-//					uLocalVideoImage.gameObject.SetActive (false);
-//				}
-		//	}
+		if (uLocalVideoImage != null) {
+			if (frame != null) {
+
+				bool changed = UpdateTexture (ref mLocalVideoTexture, frame);
+				uLocalVideoImage.texture = mLocalVideoTexture;
+				if (uLocalVideoImage.gameObject.activeSelf == false) {
+					uLocalVideoImage.gameObject.SetActive (true);
+
+				}
+				if (changed) {
+					uLocalAspectRatio.aspectRatio = mLocalVideoTexture.width / (float)mLocalVideoTexture.height;
+					uLocalVideoImage.transform.rotation = Quaternion.Euler (00f, 90f, 0f);
+				}
+			} else {
+				uLocalVideoImage.texture = null;
+				uLocalVideoImage.gameObject.SetActive (false);
+			}
+		}
 //
 //		}
 	}
@@ -502,6 +531,9 @@ public class CallApp : MonoBehaviour
 			if (frame != null) {
 				bool changed = UpdateTexture (ref mRemoteVideoTexture, frame);
 				uRemoteVideoImage.texture = mRemoteVideoTexture;
+				//TODO camera images entered rotated, fix this with camera intrinsics? 
+				// Only necessary on receiving app, not android app
+				// uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 270f);
 				if (changed) {
 					uRemoteAspectRatio.aspectRatio = mRemoteVideoTexture.width / (float)mRemoteVideoTexture.height;
 				}
@@ -565,6 +597,7 @@ public class CallApp : MonoBehaviour
 		//GUILayout.EndArea();
 		//draws the debug console (or the show button in the corner to open it)
 		DebugHelper.DrawConsole ();
+
 		
 	}
 
@@ -612,7 +645,7 @@ public class CallApp : MonoBehaviour
 		if (index <= 0) {
 			mMediaConfig.VideoDeviceName = null;
 		} else {
-			Debug.Log ("debugU: Videodevice int= " + index);
+//			Debug.Log ("debugU: Videodevice int= " + index);
 			mMediaConfig.VideoDeviceName = uVideoDropdown.options [index].text;
 			Debug.Log ("New video device selected: " + mMediaConfig.VideoDeviceName);
 		}
@@ -622,7 +655,7 @@ public class CallApp : MonoBehaviour
 	/// Adds a new message to the message view
 	/// </summary>
 	/// <param name="text"></param>
-	private void Append (string text)
+	public void Append (string text)
 	{
 		if (uMessageOutput != null) {
 			uMessageOutput.AddTextEntry (text);
@@ -667,21 +700,34 @@ public class CallApp : MonoBehaviour
 		if (mCall != null) {
 			//update the call
 			mCall.Update ();
-
 		}
-		if (Input.GetMouseButtonUp (0) & setupDone & !Mptp.clearSignal) {
-			SendMsg ("x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
-		}
+		if (setupDone) {
+			if (Input.GetMouseButtonDown (0) & setupDone) {
+				if (!MouseDown) {
+					// if first pressed we send message that mouse is down to start drawing new line renderer
+					MouseDown = true;
+					SendMsg ("MouseDown");
+				}
+				SendMsg ("mouse x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
 
-		if (Mptp.draw_mode != old_draw_mode) {
-			// If this entity changes its draw mode, we send message to other peer
-			SendMsg ("draw:" + Mptp.draw_mode);
-			old_draw_mode = Mptp.draw_mode;
-		}
+			}
+			if (Input.GetMouseButtonUp (0) & setupDone & !Mptp.clearSignal) {
 
-		if (Mptp.clearSignal) {
-			SendMsg ("clear");
-			Mptp.clearSignal = false;
+				SendMsg ("mouse x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
+				MouseDown = false;
+				SendMsg ("MouseUp");
+			}
+
+			if (Mptp.draw_mode != old_draw_mode) {
+				// If this entity changes its draw mode, we send message to other peer
+				SendMsg ("draw:" + Mptp.draw_mode);
+				old_draw_mode = Mptp.draw_mode;
+			}
+
+			if (Mptp.clearSignal) {
+				SendMsg ("clear");
+				Mptp.clearSignal = false;
+			}
 		}
 	}
 
@@ -755,10 +801,30 @@ public class CallApp : MonoBehaviour
 			//never send null or empty messages. webrtc can't deal with that
 			return;
 		}
-		if (msg.StartsWith ("New Mouse Pos")) {
+		switch (msg.Substring (0, Math.Min (3, msg.Length))) {
+		case "mou":
 			Debug.Log ("Remote Mouse received! " + msg);
-		} else
+			break;
+		case "dra":
+			Debug.Log (msg);
+			break;
+		case "cle":
+			Debug.Log ("Points cleared");
+			break;
+		case "Mou":
+			Debug.Log (msg);
+			break;
+		default:
 			Append (msg);
+			break;
+		}
+		
+
+//		if (msg.StartsWith ("New Mouse Pos")) {
+//			Debug.Log ("Remote Mouse received! " + msg);
+//		} else
+		//	Append (msg);
+		//Debug.Log ("SendMsg gebeurd!");
 		mCall.Send (msg);
 
 		//reset UI

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Tango;
+//using Tango;
 
 public class MultiPointHelp : MonoBehaviour
 {
@@ -30,7 +30,7 @@ public class MultiPointHelp : MonoBehaviour
 	/// <summary>
 	/// The point cloud object in the scene.
 	/// </summary>
-	public TangoPointCloud m_pointCloud;
+//	public TangoPointCloud m_pointCloud;
 	/// <summary>
 	/// Array to keep track of the invisible gameobjects 
 	/// </summary>
@@ -64,7 +64,7 @@ public class MultiPointHelp : MonoBehaviour
 	/// <summary>
 	/// The scene's Tango application.
 	/// </summary>
-	private TangoApplication m_tangoApplication;
+	//private TangoApplication m_tangoApplication;
 
 	/// <summary>
 	/// Output message list to show incoming and sent messages + output messages of the
@@ -76,13 +76,14 @@ public class MultiPointHelp : MonoBehaviour
 	{
 		LineRendererIndex = 0;
 		m_lineRendererList = new LineRenderer[20]; 
-		m_tangoApplication = FindObjectOfType<TangoApplication> ();
-		m_tangoApplication.Register (this);
+//		m_tangoApplication = FindObjectOfType<TangoApplication> ();
+//		m_tangoApplication.Register (this);
 		tempPoints = new GameObject[GRID_SIZE];
 		points = new Vector3[GRID_SIZE];
 		DotMarkerInvisible = new GameObject[GRID_SIZE];
 		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
 		m_lineRendererList [LineRendererIndex].enabled = false;
+		m_lineRendererList [LineRendererIndex].tag = "line";
 		tmpLine = new List<Vector3> ();
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
 		new_circle = true;
@@ -101,36 +102,36 @@ public class MultiPointHelp : MonoBehaviour
 	/// </summary>
 	public void FillGrid (GameObject[] Fill)
 	{
-		Camera cam = Camera.main;
-		//place 1 marker in center of screen
-		//
-		// 2 5 8
-		// 1 4 7
-		// 0 3 6
-
-		for (int k = 0; k < GRID_SIZE; k++) {
-			int pointIndexGrid = m_pointCloud.FindClosestPoint (cam, GridPosition [k], 10);
-			if (pointIndexGrid > -1) {
-				Vector3 recent_point_Grid = m_pointCloud.m_points [pointIndexGrid];
-				points [k] = recent_point_Grid;
-				Fill [k] = showDots (DotMarker2, "marker_invisible", points [k], k);
-			}
-		}
+//		Camera cam = Camera.main;
+//		//place 1 marker in center of screen
+//		//
+//		// 2 5 8
+//		// 1 4 7
+//		// 0 3 6
+//
+//		for (int k = 0; k < GRID_SIZE; k++) {
+//			int pointIndexGrid = m_pointCloud.FindClosestPoint (cam, GridPosition [k], 10);
+//			if (pointIndexGrid > -1) {
+//				Vector3 recent_point_Grid = m_pointCloud.m_points [pointIndexGrid];
+//				points [k] = recent_point_Grid;
+//				Fill [k] = showDots (DotMarker2, "marker_invisible", points [k], k);
+//			}
+//		}
 	}
 
 	public void GridCalculations ()
 	{
-		GridPosition = new Vector2[GRID_SIZE];
-
-		int loop = (int)Math.Sqrt (GRID_SIZE);
-		float screenDiv = (float)(1 / ((float)loop + 1));
-		int k = 0;
-		for (int i = 0; i <= loop - 1; i++) {
-			for (int j = 0; j <= loop - 1; j++) {
-				GridPosition [k] = new Vector2 (Screen.width * screenDiv + Screen.width * i * screenDiv, Screen.height * screenDiv + Screen.height * j * screenDiv);
-				k++;
-			}
-		}
+//		GridPosition = new Vector2[GRID_SIZE];
+//
+//		int loop = (int)Math.Sqrt (GRID_SIZE);
+//		float screenDiv = (float)(1 / ((float)loop + 1));
+//		int k = 0;
+//		for (int i = 0; i <= loop - 1; i++) {
+//			for (int j = 0; j <= loop - 1; j++) {
+//				GridPosition [k] = new Vector2 (Screen.width * screenDiv + Screen.width * i * screenDiv, Screen.height * screenDiv + Screen.height * j * screenDiv);
+//				k++;
+//			}
+//		}
 	}
 
 	/// @endcond
@@ -164,16 +165,16 @@ public class MultiPointHelp : MonoBehaviour
 
 	public void UpdateRectangle ()
 	{
-		//enable linerenderer
-		m_lineRendererList [LineRendererIndex].enabled = true;
-		GameObject[] DotList = GameObject.FindGameObjectsWithTag ("marker");
-		foreach (GameObject t in DotList) {
-			tmpLine.Add (t.transform.position);
-		}
-		tmpLine.Add (DotList [0].transform.position);
-		positionsOfPoints = tmpLine.ToArray ();
-		m_lineRendererList [LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
-		m_lineRendererList [LineRendererIndex].SetPositions (positionsOfPoints);
+//		//enable linerenderer
+//		m_lineRendererList [LineRendererIndex].enabled = true;
+//		GameObject[] DotList = GameObject.FindGameObjectsWithTag ("marker");
+//		foreach (GameObject t in DotList) {
+//			tmpLine.Add (t.transform.position);
+//		}
+//		tmpLine.Add (DotList [0].transform.position);
+//		positionsOfPoints = tmpLine.ToArray ();
+//		m_lineRendererList [LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
+//		m_lineRendererList [LineRendererIndex].SetPositions (positionsOfPoints);
 	}
 
 	public GameObject enableDot (int pointIndex)
@@ -181,9 +182,10 @@ public class MultiPointHelp : MonoBehaviour
 		Vector3 pos = new Vector3 ();
 		if (shot_taken) {
 			pos = DotMarkerInvisible [pointIndex].transform.position;
-		} else {
-			pos = m_pointCloud.m_points [pointIndex];
-		}
+		} 
+//		else {
+//			pos = m_pointCloud.m_points [pointIndex];
+//		}
 		GameObject test = (GameObject)Instantiate (DotMarker);
 		test.transform.position = pos;
 		test.tag = "marker";
@@ -243,6 +245,7 @@ public class MultiPointHelp : MonoBehaviour
 	{
 		LineRendererIndex++;
 		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		m_lineRendererList [LineRendererIndex].tag = "line";
 		FreeDrawText = (TextMesh)Instantiate (Text3D);
 		m_lineRendererList [LineRendererIndex].enabled = false;
 	}
@@ -289,6 +292,8 @@ public class MultiPointHelp : MonoBehaviour
 		}
 		LineRendererIndex = 0;
 		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
+		m_lineRendererList [LineRendererIndex].tag = "line";
+
 		m_lineRendererList [LineRendererIndex].enabled = false;
 		m_i = 0;
 		// remove all game objects based on marker tag
