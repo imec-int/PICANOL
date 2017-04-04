@@ -2,30 +2,27 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/CallApp.cs">
     <Files>
-      <File FileName="Assets/Scripts/CallApp.cs" Line="223" Column="4" />
-      <File FileName="Assets/Scripts/MultPointToPointGUIController.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/CallApp.cs" Line="829" Column="17" />
       <File FileName="Assets/CustomUnityVideo/CustomUnityVideoCallApp.cs" Line="1" Column="1" />
-      <File FileName="Assets/CustomUnityVideo/CustomUnityVideo.cs" Line="1" Column="1" />
-      <File FileName="Assets/TangoSDK/Core/Scripts/TangoWrappers/DepthProvider.cs" Line="1" Column="1" />
-      <File FileName="Assets/WebRtcNetwork/scripts/WebRtcNetworkFactory.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/MultiPointToPointGUIController.cs" Line="323" Column="4" />
       <File FileName="Assets/Scripts/MultiPointHelp.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="522" column="1" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="523" column="1" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="559" column="1" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="525" column="1" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="484" column="1" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/CallApp.cs" line="785" column="1" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/CallApp.cs" line="774" column="1" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="491" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="530" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="531" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="567" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="533" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="487" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/CallApp.cs" line="790" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/CallApp.cs" line="779" column="1" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="494" column="1" />
       <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/TangoSDK/Core/Scripts/TangoWrappers/DepthProvider.cs" line="238" column="1" />
       <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/CustomUnityVideo/CustomUnityVideo.cs" line="103" column="1" />
       <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/CustomUnityVideo/CustomUnityVideo.cs" line="108" column="1" />
       <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/CustomUnityVideo/CustomUnityVideo.cs" line="109" column="19" />
-      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/CallApp.cs" line="328" column="40" />
+      <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/CallApp.cs" line="332" column="40" />
       <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/CustomUnityVideo/CustomUnityVideo.cs" line="85" column="1" />
       <Breakpoint file="/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/Scripts/MultPointToPointGUIController.cs" line="226" column="10" />
     </BreakpointStore>

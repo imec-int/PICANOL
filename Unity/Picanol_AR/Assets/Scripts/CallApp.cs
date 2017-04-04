@@ -208,6 +208,7 @@ public class CallApp : MonoBehaviour
 	private bool caller = false;
 	public bool MouseDown = true;
 	public static bool holdStill = false;
+	public int markerNumber = 0;
 
 	protected virtual void Start ()
 	{
@@ -224,7 +225,7 @@ public class CallApp : MonoBehaviour
 		setupDone = false;
 		//This can be used to get the native webrtc log but causes a huge slowdown
 		//only use if not webgl
-		Append (Network.player.ipAddress);
+//		Append (Network.player.ipAddress);
 		bool nativeWebrtcLog = false;
 		if (nativeWebrtcLog) {
 #if UNITY_ANDROID
@@ -245,7 +246,7 @@ public class CallApp : MonoBehaviour
 		#else
 			caller = false;
 		#endif
-		Append ("caller = " + caller.ToString ());
+//		Append ("caller = " + caller.ToString ());
 		if (UnityCallFactory.Instance == null) {
 			Debug.LogError ("UnityCallFactory failed to initialize");
 		}
@@ -261,13 +262,9 @@ public class CallApp : MonoBehaviour
 		mMediaConfig.MinHeight = 120;
 		mMediaConfig.MaxWidth = 1920;
 		mMediaConfig.MaxHeight = 1080;
-		mMediaConfig.IdealWidth = 1920;
-		mMediaConfig.IdealHeight = 1080;
+		mMediaConfig.IdealWidth = 1080;
+		mMediaConfig.IdealHeight = 1920;
 		SetGuiState (true);
-
-
-
-
 		//fill the video dropbox
 		UpdateVideoDropdown ();
 		JoinButtonPressed ();
@@ -313,10 +310,10 @@ public class CallApp : MonoBehaviour
 		} else {
 			foreach (string s in devices) {
 				Debug.Log ("device found: " + s);
-				Append ("device found: " + s);
+//				Append ("device found: " + s);
 			}
 		}
-			Append ("Call created!");
+		Append ("Call created!");
 		mCall.CallEvent += Call_CallEvent;
 
 		if (caller) {
@@ -396,8 +393,8 @@ public class CallApp : MonoBehaviour
 				MessageEventArgs args = e as MessageEventArgs;
 				switch (args.Content.Substring (0, Math.Min (3, e.ToString ().Length))) {
 				case "mou":
-					Append ("mouse received! " + args.Content);
-					mouse_update (args.Content);
+					Debug.Log ("mouse received! " + args.Content);
+					mouse_update (args.Content.Substring (7));
 					break;
 				case "dra":
 					Mptp.draw_mode = Convert.ToInt16 (args.Content.Substring (5));
@@ -421,6 +418,10 @@ public class CallApp : MonoBehaviour
 					else
 						holdStill = true;
 					Debug.Log ("request to hold still?" + holdStill.ToString ());
+					break;
+				case "add":
+					Debug.Log (args.Content.ToString ());
+					addInfo (args.Content.ToString ().Substring (9));
 					break;
 				default:
 					Append (args.Content);
@@ -446,13 +447,21 @@ public class CallApp : MonoBehaviour
 	/// <param name="mouseLoc">Mouse location.</param>
 	void mouse_update (string mouseLoc)
 	{
-		String[] mouseSplit = mouseLoc.Split ('y');
-		float x_coor = Convert.ToSingle (mouseSplit [0].Substring (8));
-		float y_coor = Convert.ToSingle (mouseSplit [1].Substring (1));
-		
-		Append ("x_coor =" + x_coor.ToString () + " y_coor =" + y_coor.ToString ());
+		String[] mouseSplit = mouseLoc.Split (';');
+		float x_coor = Convert.ToSingle (mouseSplit [0]);
+		float y_coor = Convert.ToSingle (mouseSplit [1]);
+		markerNumber = Convert.ToInt32 (mouseSplit [2]);
+//		Append ("x_coor =" + x_coor.ToString () + " y_coor =" + y_coor.ToString () + " markernumber " + markerNumber.ToString ());
+		Mptp.RemoteUpdate (x_coor, y_coor, markerNumber);
+	}
 
-		Mptp.RemoteUpdate (x_coor, y_coor);
+	void addInfo (string extraInfo)
+	{
+		String[] InfoSplit = extraInfo.Split (';');
+		string info = InfoSplit [0];
+		markerNumber = Convert.ToInt32 (InfoSplit [1]);
+//		Append ("addInfo " + info + " marker: " + markerNumber.ToString ());
+		Mptp.AddInfoMarker [markerNumber] = info;
 	}
 
 	/// <summary>
@@ -533,7 +542,7 @@ public class CallApp : MonoBehaviour
 				uRemoteVideoImage.texture = mRemoteVideoTexture;
 				//TODO camera images entered rotated, fix this with camera intrinsics? 
 				// Only necessary on receiving app, not android app
-				// uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 270f);
+				uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 180f);
 				if (changed) {
 					uRemoteAspectRatio.aspectRatio = mRemoteVideoTexture.width / (float)mRemoteVideoTexture.height;
 				}
@@ -596,7 +605,7 @@ public class CallApp : MonoBehaviour
 		//}
 		//GUILayout.EndArea();
 		//draws the debug console (or the show button in the corner to open it)
-		DebugHelper.DrawConsole ();
+		//DebugHelper.DrawConsole ();
 
 		
 	}
@@ -660,7 +669,7 @@ public class CallApp : MonoBehaviour
 		if (uMessageOutput != null) {
 			uMessageOutput.AddTextEntry (text);
 		}
-		Debug.Log ("Chat output: " + text);
+//		Debug.Log ("Chat output: " + text);
 	}
 
 	public void Fullscreen ()
@@ -702,22 +711,23 @@ public class CallApp : MonoBehaviour
 			mCall.Update ();
 		}
 		if (setupDone) {
-			if (Input.GetMouseButtonDown (0) & setupDone) {
-				if (!MouseDown) {
-					// if first pressed we send message that mouse is down to start drawing new line renderer
-					MouseDown = true;
-					SendMsg ("MouseDown");
+			if (Mptp.draw_mode == 2) {
+				if (Input.GetMouseButtonDown (0) & setupDone) {
+					if (!MouseDown) {
+						// if first pressed we send message that mouse is down to start drawing new line renderer
+						MouseDown = true;
+						SendMsg ("MouseDown");
+					}
+					SendMsg ("mouse: " + Input.mousePosition.x.ToString () + ";" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
+
 				}
-				SendMsg ("mouse x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
+				if (Input.GetMouseButtonUp (0) & setupDone & !Mptp.clearSignal) {
 
+					SendMsg ("mouse: " + Input.mousePosition.x.ToString () + ";" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
+					MouseDown = false;
+					SendMsg ("MouseUp");
+				}
 			}
-			if (Input.GetMouseButtonUp (0) & setupDone & !Mptp.clearSignal) {
-
-				SendMsg ("mouse x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
-				MouseDown = false;
-				SendMsg ("MouseUp");
-			}
-
 			if (Mptp.draw_mode != old_draw_mode) {
 				// If this entity changes its draw mode, we send message to other peer
 				SendMsg ("draw:" + Mptp.draw_mode);
@@ -776,7 +786,7 @@ public class CallApp : MonoBehaviour
 	{
 		//get the message written into the text field
 		string msg = uMessageInputField.text;
-		SendMsg (msg);
+		SendMsg ("player: " + msg);
 	}
 
 	/// <summary>
@@ -801,6 +811,7 @@ public class CallApp : MonoBehaviour
 			//never send null or empty messages. webrtc can't deal with that
 			return;
 		}
+		
 		switch (msg.Substring (0, Math.Min (3, msg.Length))) {
 		case "mou":
 			Debug.Log ("Remote Mouse received! " + msg);
@@ -814,19 +825,14 @@ public class CallApp : MonoBehaviour
 		case "Mou":
 			Debug.Log (msg);
 			break;
+		case "pla":
+			Append (msg);
+			break;
 		default:
 			Append (msg);
 			break;
 		}
-		
-
-//		if (msg.StartsWith ("New Mouse Pos")) {
-//			Debug.Log ("Remote Mouse received! " + msg);
-//		} else
-		//	Append (msg);
-		//Debug.Log ("SendMsg gebeurd!");
 		mCall.Send (msg);
-
 		//reset UI
 		uMessageInputField.text = "";
 		uMessageInputField.Select ();

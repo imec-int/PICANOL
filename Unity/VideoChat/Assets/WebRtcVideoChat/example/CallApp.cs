@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Copyright (C) 2015 Christoph Kutza
  * 
  * Please refer to the LICENSE file for license information
@@ -14,6 +14,7 @@ using Byn.Media;
 using Byn.Media.Native;
 using System.IO;
 using Byn.Common;
+
 //using Tango;
 
 /// <summary>
@@ -191,7 +192,7 @@ public class CallApp : MonoBehaviour
 	/// Configuration of audio / video functionality
 	/// </summary>
 	protected MediaConfig mMediaConfig = new MediaConfig ();
-	protected bool mFullscreen = true;
+	protected bool mFullscreen = false;
 	//false;
 
 	private static bool sLogSet = false;
@@ -204,6 +205,12 @@ public class CallApp : MonoBehaviour
 	///
 	/// </summary>
 	private bool caller = false;
+
+	private int markerNumber = 0;
+	private string AddInfoMarker = "what to do at this marker";
+	private bool markerAdded = false;
+	private GUIStyle style;
+
 
 	protected virtual void Start ()
 	{
@@ -239,9 +246,9 @@ public class CallApp : MonoBehaviour
 		#if UNITY_ANDROID
 		caller = true;
 		#else
-			caller = false;
+		caller = false;
 		#endif
-		Append ("caller = " + caller.ToString ());
+//		Append ("caller = " + caller.ToString ());
 		if (UnityCallFactory.Instance == null) {
 			Debug.LogError ("UnityCallFactory failed to initialize");
 		}
@@ -257,14 +264,11 @@ public class CallApp : MonoBehaviour
 		mMediaConfig.MinHeight = 120;
 		mMediaConfig.MaxWidth = 1080;
 		mMediaConfig.MaxHeight = 1920;
-		mMediaConfig.IdealWidth = 320;
-		mMediaConfig.IdealHeight = 240;
+		mMediaConfig.IdealWidth = 1920;
+		mMediaConfig.IdealHeight = 1080;
 
 		SetGuiState (true);
-
-
-
-
+		//GUIStyle for textinput when adding markers
 		//fill the video dropbox
 		UpdateVideoDropdown ();
 	}
@@ -305,28 +309,10 @@ public class CallApp : MonoBehaviour
 		string[] devices = UnityCallFactory.Instance.GetVideoDevices ();
 		if (devices == null || devices.Length == 0) {
 			Debug.Log ("no device found or no device information available");
-		} else {
-			foreach (string s in devices)
-				Debug.Log ("device found: " + s);
-		}
+		} 
 		Append ("Call created!");
 		mCall.CallEvent += Call_CallEvent;
-//		if (caller) {
-//			//		Camera cam = Camera.main;//GameObject.FindGameObjectWithTag ("TangoCam").GetComponent<Camera> ();
-//			//		Append ("debugU: CallApp " + cam.name.ToString ());
-//			mMediaConfig.VideoDeviceName = uVideoDropdown.options [4].text;
-//		}	
-
-
-		//			m_camera = GetComponent<Camera> ();
-		//			Debug.Log ("debugU: TangoCamera CallApp = " + 		m_camera.name.ToString ());
-
-		//Debug.Log ("debugU: New video device selected: " + mMediaConfig.VideoDeviceName.ToString ());
-		//Debug.Log ("debugU: mMediaConfig " + mCall.ToString ());
 		mCall.Configure (mMediaConfig);
-
-
-		setupDone = true;
 		SetGuiState (false);
 	}
 
@@ -347,7 +333,6 @@ public class CallApp : MonoBehaviour
 	/// <param name="e"></param>
 	protected void Call_CallEvent (object sender, CallEventArgs e)
 	{
-		//Debug.Log ("debugU: CallEvent = " + e.Type.ToString ());
 		switch (e.Type) {
 		case CallEventType.CallAccepted:
 			//Outgoing call was successful or an incoming call arrived
@@ -366,7 +351,6 @@ public class CallApp : MonoBehaviour
 			EnsureLength ();
 			mCall.Call (uRoomNameInputField.text);
 			break;
-
 		case CallEventType.ConnectionFailed:
 			{
 				Byn.Media.ErrorEventArgs args = e as Byn.Media.ErrorEventArgs;
@@ -381,7 +365,6 @@ public class CallApp : MonoBehaviour
 				Reset ();
 			}
 			break;
-
 		case CallEventType.FrameUpdate:
 			//new frame received from webrtc (either from local camera or network)
 			//if (!caller)
@@ -391,10 +374,11 @@ public class CallApp : MonoBehaviour
 			{
 				//text message received
 				MessageEventArgs args = e as MessageEventArgs;
+				Debug.Log ("text received: " + args.Content.ToString ());
 
 				switch (args.Content.Substring (0, Math.Min (3, e.ToString ().Length))) {
 				case "mou":
-					Append ("mouse received! " + args.Content);
+					//Append ("mouse received! " + args.Content);
 					mouse_update (args.Content);
 					break;
 				case "dra":
@@ -405,11 +389,13 @@ public class CallApp : MonoBehaviour
 				case "cle":
 					Mptp.m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
 					break;
+				case "pla":
+					Append (args.C androdontent);
+					break;
 				default:
 					Append (args.Content);
 					break;
 				}
-
 				break;
 			}
 		case CallEventType.WaitForIncomingCall:
@@ -429,12 +415,13 @@ public class CallApp : MonoBehaviour
 	/// <param name="mouseLoc">Mouse location.</param>
 	void mouse_update (string mouseLoc)
 	{
-		String[] mouseSplit = mouseLoc.Split ('y');
-		float x_coor = Convert.ToSingle (mouseSplit [0].Substring (8));
-		float y_coor = Convert.ToSingle (mouseSplit [1].Substring (1));
-
-		Append ("x_coor =" + x_coor.ToString () + " y_coor =" + y_coor.ToString ());
-		Mptp.RemoteUpdate (x_coor, y_coor);
+//
+//		String[] mouseSplit = mouseLoc.Split ('y');
+//		float x_coor = Convert.ToSingle (mouseSplit [0].Substring (8));
+//		float y_coor = Convert.ToSingle (mouseSplit [1].Substring (1));
+//
+//		Append ("x_coor =" + x_coor.ToString () + " y_coor =" + y_coor.ToString ());
+//		Mptp.RemoteUpdate (x_coor, y_coor, markerNumber);
 	}
 
 	/// <summary>
@@ -504,13 +491,12 @@ public class CallApp : MonoBehaviour
 	/// <param name="frame"></param>
 	protected virtual void UpdateRemoteTexture (RawFrame frame)
 	{
-		//		if (!caller) {
 		if (uRemoteVideoImage != null) {
 			if (frame != null) {
 				bool changed = UpdateTexture (ref mRemoteVideoTexture, frame);
 				uRemoteVideoImage.texture = mRemoteVideoTexture;
-			//TODO camera images entered rotated, fix this with camera intrinsics? 
-			uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 270f);
+				//TODO camera images entered rotated, fix this with camera intrinsics? 
+				uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 270f);
 				if (changed) {
 					uRemoteAspectRatio.aspectRatio = mRemoteVideoTexture.width / (float)mRemoteVideoTexture.height;
 				}
@@ -518,7 +504,6 @@ public class CallApp : MonoBehaviour
 				uRemoteVideoImage.texture = uNoCameraTexture;
 			}
 		}
-		//		}
 	}
 
 	protected virtual void UpdateFrame (FrameUpdateEventArgs frameUpdateEventArgs)
@@ -544,7 +529,6 @@ public class CallApp : MonoBehaviour
 	protected virtual void CleanupCall ()
 	{
 		if (mCall != null) {
-
 			Debug.Log ("Destroying call!");
 			mCall.CallEvent -= Call_CallEvent;
 			mCall.Dispose ();
@@ -561,21 +545,15 @@ public class CallApp : MonoBehaviour
 		CleanupCall ();
 		setupDone = false;
 	}
-	//private bool mSpeaker = false;
 
 	private void OnGUI ()
 	{
-		//GUILayout.BeginArea(new Rect(0, 100, 500, 500));
-		//if (GUILayout.Button("Test"))
-		//{
-		//    mSpeaker = !mSpeaker;
-		//    Byn.Media.Android.AndroidHelper.SetSpeakerOn(mSpeaker);
-		//    Debug.Log("Set speaker to " + mSpeaker);
-		//}
-		//GUILayout.EndArea();
-		//draws the debug console (or the show button in the corner to open it)
+		style = new GUIStyle (GUI.skin.textArea);
+		style.fontSize = 50;
 		DebugHelper.DrawConsole ();
-
+		if (markerAdded) {
+			AddInfoMarker = GUI.TextField (new Rect (0, Screen.height / 2, Screen.width, 200), AddInfoMarker, style);
+		}
 	}
 
 	/// <summary>
@@ -614,7 +592,6 @@ public class CallApp : MonoBehaviour
 			uVideoDropdown.AddOptions (new List<string> (new string[] { "Default" }));
 			uVideoDropdown.interactable = false;
 		}
-
 	}
 
 	public void VideoDropdownOnValueChanged (int index)
@@ -642,9 +619,7 @@ public class CallApp : MonoBehaviour
 
 	public void Fullscreen ()
 	{
-
 		bool newValues = !mFullscreen;
-
 		//just in case: make sure fullscreen button is ignored if in setup mode
 		if (newValues == true && uSetupPanel.gameObject.activeSelf)
 			return;
@@ -674,15 +649,19 @@ public class CallApp : MonoBehaviour
 	/// </summary>
 	protected virtual void Update ()
 	{
+		if (Input.GetKeyDown (KeyCode.KeypadEnter) || Input.GetKeyDown (KeyCode.Return)) {
+			markerAdded = false;
+			SendMsg ("addInfo: " + AddInfoMarker + ";" + markerNumber);
+		}
 		if (mCall != null) {
 			//update the call
 			mCall.Update ();
-
 		}
-		if (Input.GetMouseButtonUp (0) & setupDone & !Mptp.clearSignal) {
-			SendMsg ("mouse x:" + Input.mousePosition.x.ToString () + " y:" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
-		}
-
+		if (Input.GetMouseButtonDown (0) & setupDone & !Mptp.clearSignal & !markerAdded) {
+			markerNumber++;
+			SendMsg ("mouse: " + Input.mousePosition.x.ToString () + ";" + Input.mousePosition.y.ToString () + ";" + markerNumber); // (1440 - mouse.y) to be correct.
+			markerAdded = true;
+		} 
 		if (Mptp.draw_mode != old_draw_mode) {
 			// If this entity changes its draw mode, we send message to other peer
 			SendMsg ("draw:" + Mptp.draw_mode);
@@ -692,9 +671,8 @@ public class CallApp : MonoBehaviour
 			SendMsg ("clear");
 			Mptp.clearSignal = false;
 		}
-
 	}
-	
+
 	#region UI
 
 	/// <summary>
@@ -724,6 +702,7 @@ public class CallApp : MonoBehaviour
 		EnsureLength ();
 		Append ("Trying to listen on address " + uRoomNameInputField.text);
 		mCall.Listen (uRoomNameInputField.text);
+		setupDone = true;
 	}
 
 	private void EnsureLength ()
@@ -780,12 +759,6 @@ public class CallApp : MonoBehaviour
 			break;
 		}
 
-
-		//		if (msg.StartsWith ("New Mouse Pos")) {
-		//			Debug.Log ("Remote Mouse received! " + msg);
-		//		} else
-		//	Append (msg);
-		//Debug.Log ("SendMsg gebeurd!");
 		mCall.Send (msg);
 
 		//reset UI

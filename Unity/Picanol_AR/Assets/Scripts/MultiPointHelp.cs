@@ -270,14 +270,14 @@ public class MultiPointHelp : MonoBehaviour
 			sum += tmp;
 		}
 		sum = sum / positionsOfPoints.Length;
-		placeNumber (FreeDrawText, sum, new Quaternion (0, 0, 0, 1));
+		placeNumber (FreeDrawText, sum, new Quaternion (0, 0, 0, 1), LineRendererIndex);
 	}
 
 
 
-	public void placeNumber (TextMesh tmp, Vector3 numberpoint, Quaternion orientation)
+	public void placeNumber (TextMesh tmp, Vector3 numberpoint, Quaternion orientation, int marker)
 	{
-		tmp.text = LineRendererIndex.ToString ();
+		tmp.text = marker.ToString ();
 		tmp.transform.position = numberpoint;
 		tmp.transform.localRotation = orientation;
 		tmp.transform.localScale = new Vector3 (0.1f, 0.1f, 0.1f);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,11 +44,11 @@ public class MultiPointHelp : MonoBehaviour
 	/// <summary>
 	/// Amount of invisble markers to place ==> higher is preciser yet heavier? ==> BENCHMARK!
 	/// </summary>
-	private const int GRID_SIZE = 144;
+	private const int GRID_SIZE = 100;
 	//	private bool ScreenshotReady;
 	public Texture2D Screenshot;
 	private Vector3[] positionsOfPoints;
-	public bool shot_taken;
+	public bool shot_taken = false;
 	public List<Vector3> tmpLine;
 	public bool new_circle;
 	public TextMesh Text3D;
@@ -83,6 +83,8 @@ public class MultiPointHelp : MonoBehaviour
 		DotMarkerInvisible = new GameObject[GRID_SIZE];
 		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
 		m_lineRendererList [LineRendererIndex].enabled = false;
+        		m_lineRendererList [LineRendererIndex].tag = "line";
+
 		tmpLine = new List<Vector3> ();
 		Path_Name = System.IO.Path.Combine (Application.persistentDataPath, Screen_Shot_File_Name);
 		new_circle = true;
@@ -178,6 +180,7 @@ public class MultiPointHelp : MonoBehaviour
 
 	public GameObject enableDot (int pointIndex)
 	{
+		//Debug.Log ("enable Dot reached");
 		Vector3 pos = new Vector3 ();
 		if (shot_taken) {
 			pos = DotMarkerInvisible [pointIndex].transform.position;
@@ -187,6 +190,7 @@ public class MultiPointHelp : MonoBehaviour
 		GameObject test = (GameObject)Instantiate (DotMarker);
 		test.transform.position = pos;
 		test.tag = "marker";
+		Debug.Log ("marker pos = " + pos.ToString ());
 		return test;
 	}
 
@@ -214,14 +218,16 @@ public class MultiPointHelp : MonoBehaviour
 		shot_taken = !shot_taken;
 	}
 
-	public void newScreenCap ()
+	public IEnumerator newScreenCap ()
 	{
-		if (System.IO.File.Exists (Path_Name)) {
-			System.IO.File.Delete (Path_Name);
-		}
-		Application.CaptureScreenshot (Screen_Shot_File_Name);
+//		if (System.IO.File.Exists (Path_Name)) {
+//			System.IO.File.Delete (Path_Name);
+//		}
+//		Application.CaptureScreenshot (Screen_Shot_File_Name);
+
 		//Faster method, more prone to shaking...
 		FillGrid (DotMarkerInvisible);
+		yield return true;
 		//ERROR: ReadPixels was called to read pixels from system frame buffer, while not inside drawing frame.
 		//UnityEngine.Texture2D:ReadPixels(Rect, Int32, Int32)
 //		Texture2D screenShot2 = new Texture2D (Screen.width, Screen.height);
@@ -245,6 +251,7 @@ public class MultiPointHelp : MonoBehaviour
 		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
 		FreeDrawText = (TextMesh)Instantiate (Text3D);
 		m_lineRendererList [LineRendererIndex].enabled = false;
+		m_lineRendererList [LineRendererIndex].tag = "line";
 	}
 
 	public void UpdateFreeDraw (Vector3 lastPoint)
@@ -263,14 +270,14 @@ public class MultiPointHelp : MonoBehaviour
 			sum += tmp;
 		}
 		sum = sum / positionsOfPoints.Length;
-		placeNumber (FreeDrawText, sum, new Quaternion (0, 0, 0, 1));
+		placeNumber (FreeDrawText, sum, new Quaternion (0, 0, 0, 1), LineRendererIndex);
 	}
 
 
 
-	public void placeNumber (TextMesh tmp, Vector3 numberpoint, Quaternion orientation)
+	public void placeNumber (TextMesh tmp, Vector3 numberpoint, Quaternion orientation, int marker)
 	{
-		tmp.text = LineRendererIndex.ToString ();
+		tmp.text = marker.ToString ();
 		tmp.transform.position = numberpoint;
 		tmp.transform.localRotation = orientation;
 		tmp.transform.localScale = new Vector3 (0.1f, 0.1f, 0.1f);
@@ -290,6 +297,8 @@ public class MultiPointHelp : MonoBehaviour
 		LineRendererIndex = 0;
 		m_lineRendererList [LineRendererIndex] = (LineRenderer)Instantiate (m_lineRenderer);
 		m_lineRendererList [LineRendererIndex].enabled = false;
+        		m_lineRendererList [LineRendererIndex].tag = "line";
+
 		m_i = 0;
 		// remove all game objects based on marker tag
 		foreach (string t in type) {
@@ -300,5 +309,10 @@ public class MultiPointHelp : MonoBehaviour
 		}
 		tempPoints = new GameObject[GRID_SIZE];
 		return true;
+	}
+
+	public string test(){
+		return ("Connection made with MultiPointHelp");
+		
 	}
 }
