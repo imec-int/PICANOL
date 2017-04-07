@@ -169,6 +169,7 @@ public class CallApp : MonoBehaviour
 
 	#endregion
 
+	public Microphone audio;
 	/// <summary>
 	/// Do not change. This length is enforced on the server side to avoid abuse.
 	/// </summary>
@@ -264,10 +265,13 @@ public class CallApp : MonoBehaviour
 		mMediaConfig.MaxHeight = 1080;
 		mMediaConfig.IdealWidth = 1080;
 		mMediaConfig.IdealHeight = 1920;
+		mMediaConfig.Audio = true;
+		
 		SetGuiState (true);
 		//fill the video dropbox
 		UpdateVideoDropdown ();
 		JoinButtonPressed ();
+		restrictions ();
 	}
 
 
@@ -282,6 +286,18 @@ public class CallApp : MonoBehaviour
 		builder.Append ("]");
 		builder.Append (msg);
 		Debug.Log (builder.ToString ());
+	}
+
+	private IEnumerator restrictions ()
+	{
+	
+
+		yield return Application.RequestUserAuthorization (UserAuthorization.WebCam | UserAuthorization.Microphone);
+		if (Application.HasUserAuthorization (UserAuthorization.WebCam | UserAuthorization.Microphone)) {
+			Debug.Log ("allowed");
+		} else {
+			Debug.Log ("not allowed");
+		}
 	}
 
 	/// <summary>
@@ -313,6 +329,10 @@ public class CallApp : MonoBehaviour
 //				Append ("device found: " + s);
 			}
 		}
+
+
+
+
 		Append ("Call created!");
 		mCall.CallEvent += Call_CallEvent;
 
@@ -422,6 +442,9 @@ public class CallApp : MonoBehaviour
 				case "add":
 					Debug.Log (args.Content.ToString ());
 					addInfo (args.Content.ToString ().Substring (9));
+					break;
+				case "pla":
+					Debug.Log (args.Content.ToString ());
 					break;
 				default:
 					Append (args.Content);
@@ -669,7 +692,7 @@ public class CallApp : MonoBehaviour
 		if (uMessageOutput != null) {
 			uMessageOutput.AddTextEntry (text);
 		}
-//		Debug.Log ("Chat output: " + text);
+		Debug.Log ("Chat output: " + text);
 	}
 
 	public void Fullscreen ()
@@ -711,21 +734,24 @@ public class CallApp : MonoBehaviour
 			mCall.Update ();
 		}
 		if (setupDone) {
-			if (Mptp.draw_mode == 2) {
+			if (Mptp.draw_mode == 1) {
 				if (Input.GetMouseButtonDown (0) & setupDone) {
 					if (!MouseDown) {
 						// if first pressed we send message that mouse is down to start drawing new line renderer
 						MouseDown = true;
-						SendMsg ("MouseDown");
+						SendMsg (uMessageInputField.text);
+						//SendMsg ("MouseDown");
 					}
-					SendMsg ("mouse: " + Input.mousePosition.x.ToString () + ";" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
+//					SendMsg ("mouse test");
+//					SendMsg ("player: tester");
+					//SendMsg ("mouse: " + Input.mousePosition.x.ToString () + ";" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
 
 				}
 				if (Input.GetMouseButtonUp (0) & setupDone & !Mptp.clearSignal) {
 
-					SendMsg ("mouse: " + Input.mousePosition.x.ToString () + ";" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
+				//	SendMsg ("mouse: " + Input.mousePosition.x.ToString () + ";" + Input.mousePosition.y.ToString ()); // (1440 - mouse.y) to be correct.
 					MouseDown = false;
-					SendMsg ("MouseUp");
+				//	SendMsg ("MouseUp");
 				}
 			}
 			if (Mptp.draw_mode != old_draw_mode) {
@@ -786,6 +812,7 @@ public class CallApp : MonoBehaviour
 	{
 		//get the message written into the text field
 		string msg = uMessageInputField.text;
+//			Append ("playerSend: " + uMessageInputField.text + msg + uRoomNameInputField.text);
 		SendMsg ("player: " + msg);
 	}
 
@@ -797,7 +824,9 @@ public class CallApp : MonoBehaviour
 	{
 		if (Input.GetKey (KeyCode.Return)) {
 			string msg = uMessageInputField.text;
-			SendMsg (msg);
+			Append ("PlayerInput: " + msg);
+
+			SendMsg ("player: " + uMessageInputField.text);
 		}
 	}
 
@@ -807,11 +836,14 @@ public class CallApp : MonoBehaviour
 	/// <param name="msg"></param>
 	private void SendMsg (string msg)
 	{
+//		Append ("antwoord: "+uMessageInputField.text+msg);
 		if (String.IsNullOrEmpty (msg)) {
 			//never send null or empty messages. webrtc can't deal with that
+			msg = uMessageInputField.text;
+			Append (msg);
 			return;
 		}
-		
+			Debug.LogWarning ("SendMSG: " + msg + " input: "+ uMessageInputField.text);
 		switch (msg.Substring (0, Math.Min (3, msg.Length))) {
 		case "mou":
 			Debug.Log ("Remote Mouse received! " + msg);
@@ -826,10 +858,16 @@ public class CallApp : MonoBehaviour
 			Debug.Log (msg);
 			break;
 		case "pla":
-			Append (msg);
+			Debug.Log (msg);
+			//Append (msg);
+
+//			Append (msg);
 			break;
 		default:
-			Append (msg);
+			Debug.Log (uMessageInputField.text);
+		//	Append (uMessageInputField.text);
+
+//			Append (msg);
 			break;
 		}
 		mCall.Send (msg);

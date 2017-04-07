@@ -266,6 +266,8 @@ public class CallApp : MonoBehaviour
 		mMediaConfig.MaxHeight = 1920;
 		mMediaConfig.IdealWidth = 1920;
 		mMediaConfig.IdealHeight = 1080;
+		mMediaConfig.Audio = true;
+
 
 		SetGuiState (true);
 		//GUIStyle for textinput when adding markers
@@ -374,11 +376,11 @@ public class CallApp : MonoBehaviour
 			{
 				//text message received
 				MessageEventArgs args = e as MessageEventArgs;
-				Debug.Log ("text received: " + args.Content.ToString ());
-
+				Debug.LogWarning ("text received: " + args.Content.ToString ());
+				//Append ("text received: " + args.Content.ToString ());
 				switch (args.Content.Substring (0, Math.Min (3, e.ToString ().Length))) {
 				case "mou":
-					//Append ("mouse received! " + args.Content);
+					Append ("mouse received! " + args.Content);
 					mouse_update (args.Content);
 					break;
 				case "dra":
@@ -390,10 +392,10 @@ public class CallApp : MonoBehaviour
 					Mptp.m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
 					break;
 				case "pla":
-					Append (args.C androdontent);
+					Append ("player"+args.Content);
 					break;
 				default:
-					Append (args.Content);
+					Append ("inquirer: "+args.Content);
 					break;
 				}
 				break;

@@ -138,25 +138,25 @@
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityVR/RuntimeEditor/UnityEngine.VR.dll</HintPath>
  </Reference>
  <Reference Include="Byn.Common">
- <HintPath>/Users/wdevries/Downloads/Picanol_AR/Assets/WebRtcNetwork/Plugins/Byn.Common.dll</HintPath>
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcNetwork/Plugins/Byn.Common.dll</HintPath>
  </Reference>
  <Reference Include="Byn.Net.Native">
- <HintPath>/Users/wdevries/Downloads/Picanol_AR/Assets/WebRtcNetwork/Plugins/Byn.Net.Native.dll</HintPath>
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcNetwork/Plugins/Byn.Net.Native.dll</HintPath>
  </Reference>
  <Reference Include="Byn.Net.Websocket">
- <HintPath>/Users/wdevries/Downloads/Picanol_AR/Assets/WebRtcNetwork/Plugins/Byn.Net.Websocket.dll</HintPath>
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcNetwork/Plugins/Byn.Net.Websocket.dll</HintPath>
  </Reference>
  <Reference Include="WebRtcCSharp">
- <HintPath>/Users/wdevries/Downloads/Picanol_AR/Assets/WebRtcNetwork/Plugins/WebRtcCSharp.dll</HintPath>
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcNetwork/Plugins/WebRtcCSharp.dll</HintPath>
  </Reference>
  <Reference Include="WebSocketSharpUnityMod">
- <HintPath>/Users/wdevries/Downloads/Picanol_AR/Assets/WebRtcNetwork/Plugins/WebSocketSharpUnityMod.dll</HintPath>
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcNetwork/Plugins/WebSocketSharpUnityMod.dll</HintPath>
  </Reference>
  <Reference Include="Byn.Media">
- <HintPath>/Users/wdevries/Downloads/Picanol_AR/Assets/WebRtcVideoChat/Plugins/Byn.Media.dll</HintPath>
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcVideoChat/Plugins/Byn.Media.dll</HintPath>
  </Reference>
  <Reference Include="Byn.Media.Native">
- <HintPath>/Users/wdevries/Downloads/Picanol_AR/Assets/WebRtcVideoChat/Plugins/Byn.Media.Native.dll</HintPath>
+ <HintPath>/Users/wdevries/Documents/PICANOL/Unity/Picanol_AR/Assets/WebRtcVideoChat/Plugins/Byn.Media.Native.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.Graphs">
  <HintPath>/Applications/Unity/Unity.app/Contents/Managed/UnityEditor.Graphs.dll</HintPath>
