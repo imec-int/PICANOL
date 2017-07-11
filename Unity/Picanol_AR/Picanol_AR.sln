@@ -1,9 +1,9 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2008
-
-Project("{0A942B24-4285-4A24-FB51-111ED7F1CF8A}") = "Picanol_AR", "Assembly-CSharp.csproj", "{3ED35AD6-7442-49DA-0047-D1C3130ADE55}"
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Picanol_AR", "Assembly-CSharp.csproj", "{3ED35AD6-7442-49DA-0047-D1C3130ADE55}"
 EndProject
-Project("{0A942B24-4285-4A24-FB51-111ED7F1CF8A}") = "Picanol_AR", "Assembly-CSharp-Editor.csproj", "{6B150ED0-E560-B5BF-66F2-CA24E0E38F14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Picanol_AR", "Assembly-CSharp-Editor.csproj", "{6B150ED0-E560-B5BF-66F2-CA24E0E38F14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

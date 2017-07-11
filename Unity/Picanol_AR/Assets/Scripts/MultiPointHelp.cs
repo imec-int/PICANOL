@@ -174,7 +174,7 @@ public class MultiPointHelp : MonoBehaviour
 		}
 		tmpLine.Add (DotList [0].transform.position);
 		positionsOfPoints = tmpLine.ToArray ();
-		m_lineRendererList [LineRendererIndex].numPositions = positionsOfPoints.Length; // add this
+		m_lineRendererList [LineRendererIndex].positionCount = positionsOfPoints.Length; // add this
 		m_lineRendererList [LineRendererIndex].SetPositions (positionsOfPoints);
 	}
 
@@ -261,7 +261,7 @@ public class MultiPointHelp : MonoBehaviour
 		m_lineRendererList [LineRendererIndex].enabled = true;
 		tmpLine.Add (lastPoint);
 		positionsOfPoints = tmpLine.ToArray ();
-		m_lineRendererList [LineRendererIndex].numPositions = positionsOfPoints.Length; 
+		m_lineRendererList [LineRendererIndex].positionCount = positionsOfPoints.Length; 
 		m_lineRendererList [LineRendererIndex].SetPositions (positionsOfPoints);
 
 		//we calculate the center of the points of the linerenderer and place our Number

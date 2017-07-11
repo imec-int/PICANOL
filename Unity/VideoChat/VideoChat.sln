@@ -1,7 +1,7 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2008
-
-Project("{9B9DF21A-1CAC-E482-33C1-AC6631D5E544}") = "VideoChat", "Assembly-CSharp.csproj", "{1A812CDA-CBD1-3EC7-5308-035C7132D896}"
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoChat", "Assembly-CSharp.csproj", "{1A812CDA-CBD1-3EC7-5308-035C7132D896}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

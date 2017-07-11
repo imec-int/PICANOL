@@ -3,12 +3,9 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/CallApp.cs">
     <Files>
       <File FileName="Assets/CustomUnityVideo/CustomUnityVideoCallApp.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/CallApp.cs" Line="742" Column="41" />
+      <File FileName="Assets/Scripts/CallApp.cs" Line="293" Column="2" />
       <File FileName="Assets/Scripts/MultiPointToPointGUIController.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/MultiPointHelp.cs" Line="1" Column="1" />
-      <File FileName="Assets/WebRtcNetwork/Plugins/android/AndroidManifest.xml" Line="1" Column="1" />
-      <File FileName="Assets/WebRtcVideoChat/scripts/native/UnityVideoCapturer.cs" Line="1" Column="1" />
-      <File FileName="Assets/WebRtcVideoChat/scripts/native/AndroidHelper.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -210,7 +210,7 @@ public class CallApp : MonoBehaviour
 	private string AddInfoMarker = "what to do at this marker";
 	private bool markerAdded = false;
 	private GUIStyle style;
-
+	private Rect textRect;
 
 	protected virtual void Start ()
 	{
@@ -224,7 +224,7 @@ public class CallApp : MonoBehaviour
 				SLog.L ("Log active");
 			}
 		}
-//		Append(Network.player.ipAddress);
+		Append(Network.player.ipAddress);
 		setupDone = false;
 		//This can be used to get the native webrtc log but causes a huge slowdown
 		//only use if not webgl
@@ -242,9 +242,12 @@ public class CallApp : MonoBehaviour
 			Debug.LogWarning("Platform doesn't support native webrtc logging.");
 			#endif
 		}
-
+		//////////////////////
+		Screen.SetResolution (1440, 2560, true);
+		//////////////////////
 		#if UNITY_ANDROID
 		caller = true;
+//		Screen.SetResolution (1440, 2560, true);
 		#else
 		caller = false;
 		#endif
@@ -262,8 +265,8 @@ public class CallApp : MonoBehaviour
 		//(apparently a problem with win10 tablets)
 		mMediaConfig.MinWidth = 160;
 		mMediaConfig.MinHeight = 120;
-		mMediaConfig.MaxWidth = 1080;
-		mMediaConfig.MaxHeight = 1920;
+		mMediaConfig.MaxWidth = 1920;
+		mMediaConfig.MaxHeight = 1080;
 		mMediaConfig.IdealWidth = 1920;
 		mMediaConfig.IdealHeight = 1080;
 		mMediaConfig.Audio = true;
@@ -392,10 +395,10 @@ public class CallApp : MonoBehaviour
 					Mptp.m_help.ClearPoints (new string[]{ "circle", "marker", "marker_invisible" });
 					break;
 				case "pla":
-					Append ("player"+args.Content);
+					Append ("player" + args.Content);
 					break;
 				default:
-					Append ("inquirer: "+args.Content);
+					Append ("inquirer: " + args.Content);
 					break;
 				}
 				break;
@@ -498,7 +501,12 @@ public class CallApp : MonoBehaviour
 				bool changed = UpdateTexture (ref mRemoteVideoTexture, frame);
 				uRemoteVideoImage.texture = mRemoteVideoTexture;
 				//TODO camera images entered rotated, fix this with camera intrinsics? 
-				uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 270f);
+				#if UNITY_ANDROID
+				uRemoteVideoImage.transform.rotation = Quaternion.Euler (0f, 180f, 270f);
+				#else
+			uRemoteVideoImage.transform.rotation = Quaternion.Euler (00f, 00f, 270f);
+				#endif
+
 				if (changed) {
 					uRemoteAspectRatio.aspectRatio = mRemoteVideoTexture.width / (float)mRemoteVideoTexture.height;
 				}
@@ -554,6 +562,8 @@ public class CallApp : MonoBehaviour
 		style.fontSize = 50;
 		DebugHelper.DrawConsole ();
 		if (markerAdded) {
+//		 	textRect = new Rect (0, Screen.height / 2, Screen.width, 200);
+
 			AddInfoMarker = GUI.TextField (new Rect (0, Screen.height / 2, Screen.width, 200), AddInfoMarker, style);
 		}
 	}
@@ -650,10 +660,11 @@ public class CallApp : MonoBehaviour
 	/// to avoid multi threading errors
 	/// </summary>
 	protected virtual void Update ()
-	{
-		if (Input.GetKeyDown (KeyCode.KeypadEnter) || Input.GetKeyDown (KeyCode.Return)) {
+	{// || Input.GetMouseButtonDown (0) & !textRect.Contains (Input.mousePosition)
+		if ((Input.GetKeyDown (KeyCode.KeypadEnter) || Input.GetKeyDown (KeyCode.Return)) & setupDone & markerAdded) {
 			markerAdded = false;
 			SendMsg ("addInfo: " + AddInfoMarker + ";" + markerNumber);
+
 		}
 		if (mCall != null) {
 			//update the call
@@ -720,8 +731,16 @@ public class CallApp : MonoBehaviour
 	public void SendButtonPressed ()
 	{
 		//get the message written into the text field
-		string msg = uMessageInputField.text;
-		SendMsg (msg);
+		string msg;
+		if (!markerAdded) {
+			msg = uMessageInputField.text;
+			SendMsg (msg);
+		} else {
+			msg = AddInfoMarker;
+			SendMsg ("addInfo: " + AddInfoMarker + ";" + markerNumber);
+		}
+		markerAdded = false;
+		
 	}
 
 	/// <summary>
